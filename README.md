@@ -51,6 +51,17 @@ python test_basic.py
 
 ### 2. Configuration
 
+#### Option A: Using the Environment Template (Recommended)
+```bash
+# Use the provided template
+cp env.example .env
+
+# Edit .env with your actual Azure OpenAI credentials
+# Required: AZURE_OPENAI_API_KEY=your_actual_api_key_here
+# Optional: AZURE_OPENAI_ENDPOINT, AZURE_DEPLOYMENT_NAME, etc.
+```
+
+#### Option B: Manual Environment Setup
 Create a `.env` file in the project root with your Azure OpenAI credentials:
 
 ```bash
