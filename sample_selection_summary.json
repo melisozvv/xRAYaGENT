@@ -1,0 +1,14 @@
+{
+  "total_samples": 500,
+  "category_distribution": {
+    "tuberculosis": 49,
+    "et_tube": 206,
+    "nodules": 164,
+    "fractures": 108,
+    "mediastinum": 417,
+    "pleural_effusion": 372,
+    "pneumonia": 342,
+    "other_abnormal": 465,
+    "normal": 494
+  }
+}
