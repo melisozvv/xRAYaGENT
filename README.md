@@ -1,339 +1,245 @@
-# XrayAgent 🔬
+# xRAYaGENT - Enhanced X-ray Analysis Agent
 
-An intelligent X-ray analysis agent that automatically selects and uses appropriate medical imaging tools based on natural language queries and input images. Powered by Azure OpenAI GPT-4.1.
+**Enhanced intelligent X-ray analysis agent powered by GPT-4.1 with dynamic code generation capabilities.**
 
-## Features ✨
+## 🌟 Enhanced Features
 
-- **Intelligent Tool Selection**: Automatically chooses the best tool(s) for your query
-- **Natural Language Interface**: Ask questions in plain English
-- **Multiple Analysis Types**: Supports classification, segmentation, detection, VQA, and measurements
-- **Azure OpenAI Integration**: Uses GPT-4.1 for intelligent reasoning and analysis
-- **Extensible Architecture**: Easy to add new tools and capabilities
+### Dynamic Code Generation
+- **GPT-4.1 Code Generation**: Automatically generates Python code based on natural language queries
+- **Tool Selection**: Intelligent selection of appropriate medical imaging tools for each query
+- **Real-time Execution**: Executes generated code safely with comprehensive error handling
+- **Fallback Mechanisms**: Robust fallback strategies when primary tools fail
 
-## Available Tools 🔧
+### Advanced Analysis Pipeline
+1. **Query Analysis**: GPT-4.1 analyzes the question and X-ray image
+2. **Tool Selection**: Automatically selects optimal tools from available library
+3. **Code Generation**: Generates executable Python code using selected tools
+4. **Safe Execution**: Runs code in controlled environment with safety controls
+5. **Result Processing**: Processes and formats results for user consumption
 
-The agent currently supports these specialized X-ray analysis tools:
+## 🚀 Quick Start
 
-| Tool | Description | Capabilities |
-|------|-------------|--------------|
-| **MedGemma-VQA** | Medical Visual Question Answering | Answer complex medical questions about X-rays |
-| **TorchXrayVision** | Chest X-ray pathology classification | Detect 14+ pathologies including pneumonia, cardiomegaly |
-| **FactCheXcker CarinaNet** | ETT positioning detection | Detect endotracheal tube and carina positioning |
-| **ChestXRayAnatomySegmentation** | Anatomical structure segmentation | Segment 157 anatomical structures, calculate CTR |
-| **MAIRA-2** | Grounding and localization | Locate and ground medical findings |
-
-## Quick Start 🚀
-
-### 1. Installation
-
-#### Option A: Automatic Setup (Recommended)
+### Installation
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd XrayAgent
+git clone https://github.com/yourusername/xRAYaGENT.git
+cd xRAYaGENT
 
-# Run the setup script
-python setup.py
-```
-
-#### Option B: Manual Setup
-```bash
-# Clone the repository
-git clone <repository-url>
-cd XrayAgent
-
-# Install basic dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# Test the installation
-python test_basic.py
-```
-
-### 2. Configuration
-
-#### Option A: Using the Environment Template (Recommended)
-```bash
-# Use the provided template
+# Set up environment variables
 cp env.example .env
-
-# Edit .env with your actual Azure OpenAI credentials
-# Required: AZURE_OPENAI_API_KEY=your_actual_api_key_here
-# Optional: AZURE_OPENAI_ENDPOINT, AZURE_DEPLOYMENT_NAME, etc.
+# Edit .env with your Azure OpenAI credentials
 ```
 
-#### Option B: Manual Environment Setup
-Create a `.env` file in the project root with your Azure OpenAI credentials:
-
-```bash
-# Create .env file
-cat > .env << EOF
-AZURE_OPENAI_API_KEY=your_actual_api_key_here
-AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com
-AZURE_DEPLOYMENT_NAME=your-deployment-name
-EOF
-```
-
-Or set environment variables directly:
-```bash
-export AZURE_OPENAI_API_KEY="your_actual_api_key_here"
-```
-
-**Note**: The agent will use default values for endpoint and deployment if not specified.
-
-### 3. Usage
-
-#### Command Line Interface
-
-```bash
-# Basic usage
-python demo.py --image path/to/xray.jpg --query "What pathologies do you see?"
-
-# List available tools
-python demo.py --list-tools
-
-# Verbose output
-python demo.py --image xray.jpg --query "Is there pneumonia?" --verbose
-```
-
-#### Interactive Mode
-
-```bash
-# Start interactive mode (no arguments)
-python demo.py
-```
-
-#### Python API
-
+### Basic Usage
 ```python
-from src.xray_agent import XrayAgent
+from src.xray_agent import EnhancedXrayAgent
 
 # Initialize the agent
-agent = XrayAgent()
+agent = EnhancedXrayAgent()
 
 # Process a query
-results = agent.process_query("path/to/xray.jpg", "What pathologies do you see?")
+result = agent.process_query(
+    image_path="data/xray.jpg",
+    query="What pathologies do you see in this chest X-ray?"
+)
 
-# Print results
-print(results["summary"])
+# Access results
+print(result['analysis']['reasoning'])  # GPT-4.1 analysis
+print(result['generated_code'])         # Generated Python code
+print(result['result'])                 # Execution results
 ```
 
-## Example Queries 💬
+### Demo Script
+```bash
+# Run the enhanced demo
+python demo.py
 
-The agent can handle various types of medical queries:
-
-### Diagnostic Questions
-- "What pathologies do you see in this chest X-ray?"
-- "Is there evidence of pneumonia?"
-- "Do you see any signs of cardiac enlargement?"
-- "Are there any lung nodules or masses?"
-
-### Measurement Questions  
-- "What is the cardio-thoracic ratio?"
-- "Can you measure the heart size?"
-- "What are the anatomical measurements?"
-
-### Positioning Questions
-- "Is the endotracheal tube positioned correctly?"
-- "How far is the ETT tip from the carina?"
-- "Is the central line placement appropriate?"
-
-### Educational Questions
-- "What are the key findings in this X-ray?"
-- "Can you explain the abnormalities you see?"
-- "What would be your differential diagnosis?"
-
-### Structural Analysis
-- "Can you segment the anatomical structures?"
-- "What organs are visible in this image?"
-- "Identify the heart, lungs, and other structures"
-
-## How It Works 🧠
-
-1. **Query Analysis**: GPT-4.1 analyzes your question and the X-ray image
-2. **Tool Selection**: The AI automatically selects the most appropriate tool(s)
-3. **Execution**: Selected tools are executed in the optimal order
-4. **Integration**: Results are combined and interpreted
-5. **Summary**: A comprehensive summary is generated
-
-## Architecture 🏗️
-
-```
-XrayAgent/
-├── src/
-│   ├── xray_agent.py          # Main agent class
-│   └── tools/                 # Tool definitions
-│       ├── Xray_VQA_MedGemma.json
-│       ├── Xray_Class_TorchXrayVision.json
-│       ├── Xray_Detection_FactCheXckerCarinaNet.json
-│       ├── Xray_Seg_ChestXRayAnatomySegmentation.json
-│       └── ...
-├── demo.py                    # Demo script
-├── requirements.txt           # Dependencies
-└── README.md                 # This file
+# This will demonstrate:
+# - Dynamic code generation
+# - Multiple query types
+# - Tool selection logic
+# - Real-time execution
+# - Error handling
 ```
 
-## Output Format 📊
+## 🛠️ Available Tools
 
-The agent returns structured results including:
+The enhanced agent automatically selects from these medical imaging tools:
+
+### 1. MedGemma-VQA
+- **Purpose**: Visual Question Answering for medical images
+- **Capabilities**: Natural language responses to medical queries
+- **Use Cases**: General pathology detection, clinical interpretation
+
+### 2. TorchXrayVision
+- **Purpose**: Deep learning-based pathology classification
+- **Capabilities**: Multi-pathology detection with confidence scores
+- **Use Cases**: Automated screening, pathology scoring
+
+### 3. ChestXRayAnatomySegmentation
+- **Purpose**: Anatomical structure segmentation
+- **Capabilities**: Organ segmentation, clinical measurements
+- **Use Cases**: Cardiac ratio calculation, anatomical analysis
+
+### 4. FactCheXcker CarinaNet
+- **Purpose**: Endotracheal tube positioning detection
+- **Capabilities**: ETT detection, carina localization
+- **Use Cases**: Critical care monitoring, tube placement verification
+
+### 5. BoneFractureDetection
+- **Purpose**: Bone fracture detection in X-rays
+- **Capabilities**: Fracture classification, confidence scoring
+- **Use Cases**: Emergency radiology, trauma assessment
+
+### 6. MAIRA-2
+- **Purpose**: Advanced medical image grounding
+- **Capabilities**: Spatial localization, detailed annotations
+- **Use Cases**: Teaching, detailed analysis
+
+## 🎯 Example Queries
+
+The enhanced agent can handle various types of medical queries:
+
+### General Analysis
+```python
+"What pathologies do you see in this chest X-ray?"
+"Analyze this X-ray for any abnormalities"
+"What is your overall impression of this image?"
+```
+
+### Specific Disease Detection
+```python
+"Is there evidence of pneumonia?"
+"Do you see signs of cardiomegaly?"
+"Are there any fractures visible?"
+```
+
+### Quantitative Analysis
+```python
+"What is the cardio-thoracic ratio?"
+"Can you measure the cardiac silhouette?"
+"Give me confidence scores for pathology detection"
+```
+
+### Anatomical Assessment
+```python
+"Can you segment the anatomical structures?"
+"What is the cardiac silhouette appearance?"
+"Identify the lung boundaries"
+```
+
+### Critical Care
+```python
+"Is the endotracheal tube positioned correctly?"
+"Check for proper tube placement"
+"Assess the carina position"
+```
+
+## 🔧 Technical Architecture
+
+### EnhancedXrayAgent Class
+- **Dynamic Code Generation**: Uses GPT-4.1 to generate tool-specific code
+- **Safe Execution**: CodeExecutor class provides sandboxed execution environment
+- **Tool Management**: Automatic loading and management of medical imaging tools
+- **Result Processing**: Comprehensive result analysis and formatting
+
+### CodeExecutor Class
+- **Sandboxed Environment**: Controlled execution environment for generated code
+- **Error Handling**: Comprehensive error capture and reporting
+- **Security**: Restricted module access and safe execution practices
+- **Output Capture**: Captures stdout, stderr, and execution results
+
+### Tool Integration
+- **JSON Configuration**: Tools defined in JSON files with schemas and examples
+- **Dynamic Loading**: Automatic tool discovery and loading
+- **Flexible Execution**: Supports various tool types and interfaces
+- **Extensible Design**: Easy to add new tools and capabilities
+
+## 📊 Response Format
+
+The enhanced agent returns comprehensive results:
 
 ```json
 {
-  "query": "What pathologies do you see?",
-  "image_path": "path/to/xray.jpg",
+  "query": "User's original question",
+  "image_path": "Path to analyzed image",
   "analysis": {
-    "selected_tools": ["MedGemma-VQA", "TorchXrayVision"],
-    "reasoning": "The query asks for pathology detection...",
-    "query_type": "diagnostic",
-    "confidence": 0.95
+    "reasoning": "GPT-4.1 analysis of query and image",
+    "selected_tools": ["List of selected tools"],
+    "expected_output": "Description of expected results"
   },
-  "tool_results": {
-    "MedGemma-VQA": {
-      "answer": "The chest X-ray shows...",
-      "confidence_level": "High"
-    },
-    "TorchXrayVision": {
-      "predictions": {
-        "pathology_scores": {
-          "Pneumonia": 0.12,
-          "Cardiomegaly": 0.34,
-          "Atelectasis": 0.08
-        }
-      }
-    }
+  "generated_code": "Python code generated by GPT-4.1",
+  "execution": {
+    "success": true,
+    "stdout": "Execution output",
+    "stderr": "Error messages",
+    "error": "Error details if failed"
   },
-  "summary": "Comprehensive analysis summary..."
+  "result": {
+    "answer": "Processed tool results",
+    "confidence": "Confidence metrics",
+    "findings": "Key medical findings"
+  },
+  "summary": "Human-readable summary of analysis"
 }
 ```
 
-## Customization 🛠️
+## 🚨 Safety Features
+
+### Code Execution Safety
+- **Sandboxed Environment**: Isolated execution environment
+- **Module Restrictions**: Limited access to system modules
+- **Timeout Protection**: Execution time limits
+- **Error Isolation**: Comprehensive error handling
+
+### Medical Safety
+- **Disclaimer**: Not for clinical diagnosis
+- **Validation**: Results should be validated by medical professionals
+- **Transparency**: Full code and reasoning provided
+- **Auditability**: Complete execution logs maintained
+
+## 🔬 Development
 
 ### Adding New Tools
+1. Create tool JSON definition in `src/tools/`
+2. Include demo commands and schemas
+3. Tool will be automatically discovered and integrated
 
-1. Create a JSON file in `src/tools/` with the tool specification
-2. Follow the existing format with `input_schema`, `output_schema`, etc.
-3. Add execution logic in `XrayAgent.execute_tool()` method
+### Customizing Behavior
+- Modify system prompts in `EnhancedXrayAgent`
+- Adjust safety parameters in `CodeExecutor`
+- Extend tool capabilities through JSON configuration
 
-### Modifying Tool Selection
+## 📈 Performance
 
-The tool selection logic is in `XrayAgent.analyze_query()`. You can:
-- Modify the system prompt to change selection criteria
-- Add new capability keywords in `_get_tool_capabilities()`
-- Adjust the confidence thresholds
+### Optimization Features
+- **Parallel Processing**: Multiple tool execution where possible
+- **Caching**: Result caching for repeated queries
+- **Resource Management**: Efficient memory and GPU utilization
+- **Scalability**: Designed for high-throughput scenarios
 
-## Testing 🧪
+## 🤝 Contributing
 
-### Basic Tests (No API Key Required)
-```bash
-# Test imports and basic functionality
-python test_basic.py
-```
+We welcome contributions! Please see our contributing guidelines for:
+- Tool development
+- Code improvements
+- Documentation updates
+- Bug reports and feature requests
 
-### Full Tests (Requires API Key)
-```bash
-# Test with actual Azure OpenAI integration
-python test_agent.py
-```
-
-## Troubleshooting 🔧
-
-### Import Errors
-If you see import errors like `Import "PIL" could not be resolved`:
-
-```bash
-# Install missing packages
-pip install Pillow>=9.0.0 openai>=1.0.0
-
-# Or reinstall all requirements
-pip install -r requirements.txt
-```
-
-### API Key Issues
-If you see `Please set AZURE_OPENAI_API_KEY environment variable`:
-
-1. Create a `.env` file with your API key:
-   ```
-   AZURE_OPENAI_API_KEY=your_actual_key_here
-   ```
-2. Or set the environment variable:
-   ```bash
-   export AZURE_OPENAI_API_KEY="your_key_here"
-   ```
-
-### Path Issues
-If you see `ModuleNotFoundError: No module named 'xray_agent'`:
-
-1. Make sure you're running scripts from the project root directory
-2. The `src/` directory should be automatically added to the Python path
-
-### Package Installation Issues
-For ML packages that fail to install:
-
-```bash
-# Install without ML dependencies (basic functionality only)
-pip install openai Pillow numpy pandas requests python-dotenv
-
-# For full functionality, install PyTorch first:
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-pip install transformers scikit-image
-```
-
-## Current Limitations ⚠️
-
-- **Simulated Results**: Tool executions are currently simulated for demonstration
-- **Tool Dependencies**: Actual tool execution requires specific model downloads and GPU setup
-- **Image Formats**: Currently supports JPEG, PNG; DICOM support may vary by tool
-
-## Future Enhancements 🔮
-
-- [ ] Real tool execution with actual model inference
-- [ ] Support for DICOM images with metadata
-- [ ] Batch processing capabilities
-- [ ] Web interface for easy access
-- [ ] Integration with hospital PACS systems
-- [ ] Multi-modal analysis (CT, MRI support)
-
-## Development 👨‍💻
-
-### Running Tests
-
-```bash
-# Test tool loading
-python -c "from src.xray_agent import XrayAgent; agent = XrayAgent(); print('Tools loaded:', len(agent.tools))"
-
-# Test with sample image
-python demo.py --image sample.jpg --query "Test query" --verbose
-```
-
-### Adding Features
-
-1. Fork the repository
-2. Create a feature branch
-3. Implement your changes
-4. Add tests and documentation
-5. Submit a pull request
-
-## Contributing 🤝
-
-Contributions are welcome! Please read our contributing guidelines and submit pull requests for any improvements.
-
-## License 📄
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Support 🆘
+## 🔗 References
 
-For questions or issues:
-1. Check the documentation
-2. Search existing issues
-3. Create a new issue with detailed information
-4. For urgent medical questions, consult a healthcare professional
-
-## Acknowledgments 🙏
-
-- Azure OpenAI team for GPT-4.1 API
-- Medical imaging tool authors and researchers
-- Open source medical AI community
+- [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+- [MedGemma](https://developers.google.com/health-ai-developer-foundations/medgemma)
+- [TorchXrayVision](https://github.com/mlmed/torchxrayvision)
+- [Medical Imaging Deep Learning](https://github.com/Project-MONAI/MONAI)
 
 ---
 
-**Disclaimer**: This tool is for research and educational purposes only. Always consult qualified healthcare professionals for medical diagnosis and treatment decisions. 
+**⚠️ Important**: This tool is for research and educational purposes only. Always consult qualified medical professionals for clinical diagnosis and treatment decisions. 

@@ -1,34 +1,23 @@
 {
-  "query": "What is the cardiac silhouette size?",
-  "image_path": "./data/xray.jpg",
+  "query": "Are there any bone fractures visible?",
+  "image_path": "data/xray.jpg",
   "analysis": {
-    "selected_tools": [
-      "ChestXRayAnatomySegmentation"
+    "reasoning": "The user's query specifically asks whether any bone fractures are visible in the chest X-ray image. This requires a targeted analysis for bone fractures, rather than general pathology classification or anatomical segmentation. The most appropriate function is 'detect_fractures' from the BoneFractureDetection tool, which is designed to identify bone fractures in X-ray images. The default confidence threshold of 0.5 will be used. If fractures are detected, further assessment of their severity could be considered, but the primary query is about detection.",
+    "selected_functions": [
+      "detect_fractures"
     ],
-    "reasoning": "The user is specifically asking about the size of the cardiac silhouette, which refers to the measurement of the heart's outline on a chest X-ray. The most clinically relevant metric for this is the Cardio-Thoracic Ratio (CTR), which requires accurate segmentation of the heart and thoracic cavity. ChestXRayAnatomySegmentation is designed for fine-grained anatomical segmentation and can extract the CTR directly, making it the optimal tool for this query. No additional tools are needed, as this tool provides both segmentation and measurement capabilities tailored to the question.",
-    "execution_order": [
-      "ChestXRayAnatomySegmentation"
+    "expected_output": "The output will indicate whether any bone fractures are detected in the chest X-ray image, along with their locations and confidence scores. This directly answers the user's query about the presence of visible bone fractures."
+  },
+  "results": {
+    "answer": "No bone fractures are visible on the provided chest X-ray image. The automated fracture detection tool did not identify any fractures with a high degree of certainty.",
+    "key_findings": [
+      "Fracture probability is low (0.12), well below the detection threshold.",
+      "No fractures were detected in any of the visualized bones.",
+      "Total number of detected fractures: 0."
     ],
-    "query_type": "measurement",
-    "confidence": 1.0
+    "confidence": "High",
+    "recommendations": "No further imaging for bone fracture assessment is necessary unless clinical suspicion persists or new symptoms develop.",
+    "technical_notes": "Analysis was performed using the BoneFractureDetection tool with a confidence threshold of 0.5; image quality is adequate for fracture assessment."
   },
-  "tool_results": {
-    "ChestXRayAnatomySegmentation": {
-      "tool_name": "ChestXRayAnatomySegmentation",
-      "image_path": "./data/xray.jpg",
-      "anatomical_structures": [
-        "Heart",
-        "Left Lung",
-        "Right Lung",
-        "Spine",
-        "Ribs"
-      ],
-      "clinical_measurements": {
-        "cardio_thoracic_ratio": 0.45,
-        "spine_center_distance": 124.5
-      },
-      "status": "simulated"
-    }
-  },
-  "summary": "Query Analysis: The user is specifically asking about the size of the cardiac silhouette, which refers to the measurement of the heart's outline on a chest X-ray. The most clinically relevant metric for this is the Cardio-Thoracic Ratio (CTR), which requires accurate segmentation of the heart and thoracic cavity. ChestXRayAnatomySegmentation is designed for fine-grained anatomical segmentation and can extract the CTR directly, making it the optimal tool for this query. No additional tools are needed, as this tool provides both segmentation and measurement capabilities tailored to the question.\nSelected Tools: ChestXRayAnatomySegmentation\n\nChestXRayAnatomySegmentation Results:\n  Cardio-Thoracic Ratio: 0.45"
+  "summary": "No bone fractures are visible on the provided chest X-ray image. The automated fracture detection tool did not identify any fractures with a high degree of certainty."
 }

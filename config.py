@@ -42,10 +42,10 @@ LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 # Model Preferences
 # =================
-PREFERRED_VQA_MODEL = "MedGemma-VQA"
-PREFERRED_CLASSIFICATION_MODEL = "TorchXrayVision"  
+PREFERRED_CLASSIFICATION_MODEL = "TorchXrayVision"
 PREFERRED_SEGMENTATION_MODEL = "ChestXRayAnatomySegmentation"
 PREFERRED_DETECTION_MODEL = "FactCheXcker CarinaNet"
+PREFERRED_GROUNDING_MODEL = "MAIRA-2"
 
 # Tool Selection Keywords
 # ======================
@@ -111,7 +111,6 @@ def get_config():
         
         # Model preferences
         "preferred_models": {
-            "vqa": PREFERRED_VQA_MODEL,
             "classification": PREFERRED_CLASSIFICATION_MODEL,
             "segmentation": PREFERRED_SEGMENTATION_MODEL,
             "detection": PREFERRED_DETECTION_MODEL

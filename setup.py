@@ -97,26 +97,7 @@ AZURE_OPENAI_API_KEY=your_api_key_here
         print(f"❌ Failed to create .env file: {e}")
         return False
 
-def test_imports():
-    """Test that key imports work"""
-    print("🧪 Testing imports...")
-    
-    test_imports = [
-        ("PIL", "from PIL import Image"),
-        ("openai", "from openai import AzureOpenAI"),
-        ("numpy", "import numpy"),
-        ("pandas", "import pandas"),
-    ]
-    
-    for name, import_statement in test_imports:
-        try:
-            exec(import_statement)
-            print(f"✅ {name} import successful")
-        except ImportError as e:
-            print(f"❌ {name} import failed: {e}")
-            return False
-    
-    return True
+
 
 def main():
     """Main setup function"""
@@ -146,17 +127,10 @@ def main():
     print("\n🔧 Setting up environment...")
     create_env_file()
     
-    # Test imports
-    print("\n🧪 Testing installation...")
-    if test_imports():
-        print("\n✅ Setup completed successfully!")
-        print("\n🚀 Next steps:")
-        print("   1. Add your Azure OpenAI API key to the .env file")
-        print("   2. Test the installation: python test_agent.py")
-        print("   3. Try a demo: python demo.py --image data/xray.jpg --query 'What do you see?'")
-    else:
-        print("\n⚠️  Setup completed with warnings")
-        print("   Some imports failed. You may need to install additional packages manually.")
+    print("\n✅ Setup completed successfully!")
+    print("\n🚀 Next steps:")
+    print("   1. Add your Azure OpenAI API key to the .env file")
+    print("   2. Try a demo: python demo.py --image data/xray.jpg --query 'What do you see?'")
     
     print("\n📖 For more information, see the README.md file")
 

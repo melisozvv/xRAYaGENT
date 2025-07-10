@@ -1,248 +1,233 @@
 #!/usr/bin/env python3
 """
-Demo script for XrayAgent - Intelligent X-ray Analysis Agent
+XRAYaGENT Demo Script
 
-This script demonstrates how to use the XrayAgent to analyze chest X-ray images
-with natural language queries using Azure OpenAI GPT-4.1.
+This script demonstrates the capabilities of the XRAYaGENT system for medical imaging analysis.
+It processes a sample chest X-ray using multiple AI tools and generates comprehensive reports.
+
+Features:
+- Multi-tool AI analysis
+- Real model inference
+- Comprehensive reporting
+- Tool testing capabilities
 
 Usage:
-    python demo.py --image ./data/xray.jpg --query "What is the cardiac silhouette size?"
-    python demo.py --image path/to/xray.jpg --query "Is there pneumonia?"
-    python demo.py --image path/to/xray.jpg --query "What is the cardiac silhouette size?"
+    python demo.py
 """
 
-import argparse
-import json
-import sys
-from pathlib import Path
-import logging
 import os
+import sys
+import json
+from pathlib import Path
 
-# Add src to path to import our agent
-current_dir = Path(__file__).parent
-src_path = current_dir / "src"
-if str(src_path) not in sys.path:
-    sys.path.insert(0, str(src_path))
+# Add src directory to path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-try:
-    from xray_agent import XrayAgent
-except ImportError as e:
-    print(f"❌ Error importing XrayAgent: {e}")
-    print("Make sure you're running this script from the project root directory")
-    print("and that all dependencies are installed: pip install -r requirements.txt")
-    sys.exit(1)
+from xray_agent import XrayAgent
 
 def main():
-    parser = argparse.ArgumentParser(description="XrayAgent Demo - Intelligent X-ray Analysis")
-    parser.add_argument("--image", "-i", required=True, 
-                       help="Path to the chest X-ray image file")
-    parser.add_argument("--query", "-q", required=True,
-                       help="Natural language query about the X-ray")
-    parser.add_argument("--tools-dir", default="src/tools",
-                       help="Directory containing tool JSON files")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                       help="Enable verbose logging")
-    parser.add_argument("--list-tools", action="store_true",
-                       help="List available tools and exit")
+    """Main demo function"""
+    print("🔬 Enhanced XrayAgent Demo - Predefined Functions")
+    print("=" * 60)
     
-    args = parser.parse_args()
-    
-    # Configure logging
-    logging.basicConfig(
-        level=logging.INFO if args.verbose else logging.WARNING,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
+    # Initialize the enhanced agent
+    print("Initializing XrayAgent...")
     try:
-        # Initialize the agent
-        print("🔬 Initializing XrayAgent...")
-        agent = XrayAgent(tools_dir=args.tools_dir)
-        
-        # List tools if requested
-        if args.list_tools:
-            print("\n📋 Available Tools:")
-            print("=" * 50)
-            tools = agent.list_available_tools()
-            for name, info in tools.items():
-                print(f"\n🔧 {name}")
-                print(f"   Description: {info['description'][:100]}...")
-                print(f"   Tasks: {', '.join(info['supported_tasks'])}")
-                print(f"   Capabilities: {', '.join(info['capabilities'])}")
-            return
-        
-        # Validate image file
-        if not Path(args.image).exists():
-            print(f"❌ Error: Image file '{args.image}' not found")
-            return
-        
-        print(f"📷 Image: {args.image}")
-        print(f"❓ Query: {args.query}")
-        print("\n🤖 Processing query with XrayAgent...")
-        print("=" * 60)
-        
-        # Process the query
-        results = agent.process_query(args.image, args.query)
-        
-        # Display results
-        if "error" in results:
-            print(f"❌ Error: {results['error']}")
-            return
-        
-        # Show analysis
-        analysis = results.get("analysis", {})
-        print(f"\n🧠 AI Analysis:")
-        print(f"   Query Type: {analysis.get('query_type', 'Unknown')}")
-        print(f"   Confidence: {analysis.get('confidence', 0):.2f}")
-        print(f"   Selected Tools: {', '.join(analysis.get('selected_tools', []))}")
-        print(f"   Reasoning: {analysis.get('reasoning', 'No reasoning provided')}")
-        
-        # Show tool results
-        print(f"\n🔧 Tool Results:")
-        print("=" * 40)
-        
-        tool_results = results.get("tool_results", {})
-        for tool_name, tool_result in tool_results.items():
-            print(f"\n📊 {tool_name}:")
-            
-            if "error" in tool_result:
-                print(f"   ❌ Error: {tool_result['error']}")
-                continue
-            
-            if tool_name == "MedGemma-VQA":
-                print(f"   💬 Answer: {tool_result.get('answer', 'No answer')}")
-                print(f"   🎯 Confidence: {tool_result.get('confidence_level', 'Unknown')}")
-                findings = tool_result.get('key_findings', [])
-                if findings:
-                    print(f"   🔍 Key Findings: {', '.join(findings)}")
-            
-            elif tool_name == "TorchXrayVision":
-                predictions = tool_result.get("predictions", {}).get("pathology_scores", {})
-                if predictions:
-                    print("   🩺 Pathology Predictions:")
-                    # Sort by confidence score
-                    sorted_preds = sorted(predictions.items(), key=lambda x: x[1], reverse=True)
-                    for pathology, score in sorted_preds[:5]:  # Show top 5
-                        print(f"      {pathology}: {score:.3f}")
-            
-            elif tool_name == "ChestXRayAnatomySegmentation":
-                structures = tool_result.get("anatomical_structures", [])
-                if structures:
-                    print(f"   🫁 Anatomical Structures: {', '.join(structures)}")
-                
-                measurements = tool_result.get("clinical_measurements", {})
-                if measurements:
-                    print("   📏 Clinical Measurements:")
-                    for measure, value in measurements.items():
-                        print(f"      {measure.replace('_', ' ').title()}: {value}")
-            
-            elif tool_name == "FactCheXcker CarinaNet":
-                print(f"   🫁 ETT Detected: {tool_result.get('ett_detected', 'Unknown')}")
-                print(f"   🔍 Carina Detected: {tool_result.get('carina_detected', 'Unknown')}")
-                print(f"   📍 Positioning: {tool_result.get('positioning_status', 'Unknown')}")
-                if 'carina_confidence' in tool_result:
-                    print(f"   🎯 Carina Confidence: {tool_result['carina_confidence']:.2f}")
-            
-            # Show status
-            status = tool_result.get("status", "unknown")
-            if status == "simulated":
-                print("   ⚠️  Note: This is a simulated result for demonstration")
-        
-        # Show summary
-        summary = results.get("summary", "")
-        if summary:
-            print(f"\n📝 Summary:")
-            print("=" * 30)
-            print(summary)
-        
-        # Option to save results
-        print(f"\n💾 Full results available in JSON format")
-        save_choice = input("Save detailed results to file? (y/n): ").lower().strip()
-        if save_choice == 'y':
-            output_file = f"xray_analysis_results.json"
-            with open(output_file, 'w') as f:
-                json.dump(results, f, indent=2)
-            print(f"✅ Results saved to {output_file}")
-        
-    except KeyboardInterrupt:
-        print("\n\n⏹️  Analysis interrupted by user")
+        agent = XrayAgent()
+        print(f"✅ Successfully initialized agent with predefined functions")
+        print()
     except Exception as e:
-        print(f"\n❌ An error occurred: {e}")
-        if args.verbose:
-            import traceback
-            traceback.print_exc()
-
-def interactive_mode():
-    """Interactive mode for multiple queries"""
-    print("🔬 XrayAgent Interactive Mode")
-    print("=" * 40)
+        print(f"❌ Error initializing agent: {e}")
+        return
     
-    # Get image path
-    while True:
-        image_path = input("📷 Enter path to X-ray image: ").strip()
-        if Path(image_path).exists():
-            break
-        print("❌ File not found. Please try again.")
-    
-    # Initialize agent
-    print("\n🤖 Initializing XrayAgent...")
-    agent = XrayAgent()
-    
-    print("\n✅ Agent ready! Enter your queries (type 'quit' to exit)")
-    print("Example queries:")
-    print("  - What pathologies do you see in this chest X-ray?")
-    print("  - Is there evidence of pneumonia?")
-    print("  - What is the cardio-thoracic ratio?")
-    print("  - Can you segment the anatomical structures?")
+    # Show available functions
+    print("🛠️  Available Functions:")
+    functions = agent.list_available_functions()
+    for tool_name, tool_functions in functions.items():
+        print(f"  📦 {tool_name}:")
+        for func_name, func_info in tool_functions.items():
+            print(f"    • {func_name}: {func_info['description']}")
     print()
     
-    while True:
+    # Check for sample image
+    image_path = "data/xray.jpg"
+    if not os.path.exists(image_path):
+        print(f"❌ Sample image not found: {image_path}")
+        print("Please ensure the X-ray image exists in the data directory.")
+        return
+    
+    # Sample queries to demonstrate different capabilities
+    sample_queries = [
+        {
+            "query": "What pathologies do you see in this chest X-ray?",
+            "description": "VQA for general pathology detection"
+        },
+        {
+            "query": "Can you classify the pathologies with confidence scores?",
+            "description": "Pathology classification with scoring"
+        },
+        {
+            "query": "What is the cardio-thoracic ratio?",
+            "description": "Anatomical measurements"
+        },
+        {
+            "query": "Is the endotracheal tube positioned correctly?",
+            "description": "ETT positioning assessment"
+        },
+        {
+            "query": "Are there any bone fractures visible?",
+            "description": "Fracture detection"
+        }
+    ]
+    
+    print("🔍 Running Demo Queries...")
+    print("=" * 60)
+    
+    for i, query_info in enumerate(sample_queries, 1):
+        query = query_info["query"]
+        description = query_info["description"]
+        
+        print(f"\n📋 Query {i}: {description}")
+        print(f"❓ Question: {query}")
+        print("-" * 40)
+        
         try:
-            query = input("❓ Query: ").strip()
+            # Run the query
+            result = agent.process_query(image_path, query)
             
-            if query.lower() in ['quit', 'exit', 'q']:
-                print("👋 Goodbye!")
-                break
+            # Display results
+            print(f"\nQuery: {result['query']}")
+            print(f"Image: {result['image_path']}")
+            print(f"\nAnalysis:")
+            print(f"  Reasoning: {result['analysis']['reasoning']}")
+            print(f"  Selected Functions: {', '.join(result['analysis']['selected_functions'])}")
             
-            if not query:
-                continue
+            print(f"\nResults:")
+            print(f"  Answer: {result['results']['answer']}")
+            print(f"  Key Findings: {', '.join(result['results']['key_findings'])}")
+            print(f"  Confidence: {result['results']['confidence']}")
+            if result['results']['recommendations']:
+                print(f"  Recommendations: {', '.join(result['results']['recommendations'])}")
+            if result['results']['technical_notes']:
+                print(f"  Technical Notes: {result['results']['technical_notes']}")
             
-            print(f"\n🤖 Processing: {query}")
-            print("-" * 50)
+            # Print summary
+            print(f"\nSummary: {result['summary']}")
             
-            results = agent.process_query(image_path, query)
+            # Save results to file
+            with open('xray_analysis_results.json', 'w') as f:
+                json.dump(result, f, indent=2, default=str)
             
-            if "error" in results:
-                print(f"❌ Error: {results['error']}")
-                continue
+            print("\n" + "="*60)
+            print("Analysis complete. Results saved to 'xray_analysis_results.json'")
+            print("="*60)
             
-            # Quick summary
-            analysis = results.get("analysis", {})
-            tools_used = ', '.join(analysis.get('selected_tools', []))
-            print(f"🔧 Tools used: {tools_used}")
+            # Demo: Folder processing for anatomy segmentation
+            print("\n🔍 Demonstrating folder processing for anatomy segmentation...")
+            try:
+                # Use the agent to process a folder
+                folder_query = "Process all images in the data folder and generate anatomy masks"
+                folder_result = agent.process_query("data/", folder_query)
+                
+                print(f"\nFolder Query: {folder_result['query']}")
+                print(f"Analysis: {folder_result['analysis']['reasoning']}")
+                print(f"Results: {folder_result['results']['answer']}")
+                
+                # Save folder results
+                with open('folder_analysis_results.json', 'w') as f:
+                    json.dump(folder_result, f, indent=2, default=str)
+                
+                print("\n" + "="*60)
+                print("Folder processing complete. Results saved to 'folder_analysis_results.json'")
+                print("="*60)
+                
+            except Exception as e:
+                print(f"⚠️  Folder processing demo failed: {e}")
             
-            # Show key results
-            tool_results = results.get("tool_results", {})
-            for tool_name, tool_result in tool_results.items():
-                if tool_name == "MedGemma-VQA":
-                    answer = tool_result.get('answer', 'No answer')
-                    print(f"💬 {answer}")
-                elif tool_name == "TorchXrayVision":
-                    predictions = tool_result.get("predictions", {}).get("pathology_scores", {})
-                    if predictions:
-                        top_pred = max(predictions.items(), key=lambda x: x[1])
-                        print(f"🩺 Top finding: {top_pred[0]} ({top_pred[1]:.3f})")
-            
-            print()
-            
-        except KeyboardInterrupt:
-            print("\n\n👋 Goodbye!")
-            break
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f"❌ Error processing query: {e}")
+        
+        print("-" * 60)
+    
+    print("\n🎯 Demo Complete!")
+    print("\nKey Features Demonstrated:")
+    print("• GPT-4.1 selection of appropriate predefined functions")
+    print("• Structured parameter passing to medical imaging tools")
+    print("• Real tool execution with proper error handling")
+    print("• Comprehensive result analysis and reporting")
+    print("• Modular, testable tool architecture")
+
+def test_individual_tools():
+    """Test individual tool functions"""
+    print("\n🧪 Testing Individual Tool Functions")
+    print("=" * 50)
+    
+    # Test each tool individually
+    tool_tests = [
+        ("TorchXrayVision", "torchxrayvision_classifier", "test_torchxrayvision"),
+        ("Anatomy Segmentation", "anatomy_segmentation", "test_anatomy_segmentation"),
+        ("ETT Detection", "ett_detection", "test_ett_detection"),
+        ("Bone Fracture Detection", "bone_fracture_detection", "test_bone_fracture_detection"),
+        ("MAIRA-2 Detection", "maira_2", "test_maira2_detection"),
+    ]
+    
+    sys.path.append(str(Path(__file__).parent / "src" / "tools"))
+    
+    for tool_name, module_name, test_func_name in tool_tests:
+        print(f"\n🔧 Testing {tool_name}...")
+        try:
+            module = __import__(module_name)
+            test_func = getattr(module, test_func_name)
+            success = test_func()
+            if success:
+                print(f"✅ {tool_name} test passed")
+            else:
+                print(f"❌ {tool_name} test failed")
+        except Exception as e:
+            print(f"❌ {tool_name} test error: {e}")
+
+def show_function_selection_example():
+    """Show how GPT-4.1 selects functions for a query"""
+    print("\n🤖 GPT-4.1 Function Selection Example")
+    print("=" * 50)
+    
+    agent = XrayAgent()
+    image_path = "data/xray.jpg"
+    
+    if not os.path.exists(image_path):
+        print("❌ Sample image not found")
+        return
+    
+    query = "What pathologies do you see and what is the cardio-thoracic ratio?"
+    
+    print(f"Query: {query}")
+    print("\nFunction Selection Process:")
+    print("-" * 30)
+    
+    try:
+        function_selection = agent.select_functions(query, image_path)
+        
+        print(f"Reasoning: {function_selection.get('reasoning', 'No reasoning provided')}")
+        print(f"Expected Output: {function_selection.get('expected_output', 'No description')}")
+        print("\nSelected Function Calls:")
+        
+        for i, func_call in enumerate(function_selection.get("function_calls", []), 1):
+            print(f"  {i}. {func_call['tool_name']}.{func_call['function_name']}")
+            print(f"     Parameters: {func_call['parameters']}")
+        
+    except Exception as e:
+        print(f"Error in function selection: {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        # No arguments, start interactive mode
-        interactive_mode()
-    else:
-        main() 
+    # Run main demo
+    main()
+    
+    # Optional individual tool testing
+    test_tools = input("\n🔬 Would you like to test individual tools? (y/n): ")
+    if test_tools.lower() == 'y':
+        test_individual_tools()
+    
+    # Optional function selection example
+    show_selection = input("\n🤖 Would you like to see function selection example? (y/n): ")
+    if show_selection.lower() == 'y':
+        show_function_selection_example() 

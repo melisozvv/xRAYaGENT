@@ -1,10 +1,8 @@
 import os
 import json
 import glob
-import subprocess
-import tempfile
 import base64
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from pathlib import Path
 import logging
@@ -19,6 +17,13 @@ try:
     from openai import AzureOpenAI
 except ImportError:
     raise ImportError("OpenAI library is required. Install with: pip install openai>=1.0.0")
+
+# Import tool classes
+from tools.torchxrayvision_classifier import TorchXrayVisionClassifier
+from tools.anatomy_segmentation import ChestXrayAnatomySegmentation
+from tools.ett_detection import ETTDetection
+from tools.bone_fracture_detection import BoneFractureDetection
+from tools.maira_2 import MAIRA2Detection
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,151 +53,187 @@ def get_azure_client():
     )
 
 @dataclass
-class ToolInfo:
-    """Dataclass to store tool information"""
-    name: str
-    description: str
-    author: str
-    version: str
-    input_schema: dict
-    output_schema: dict
-    demo_commands: List[str]
-    file_path: str
-    supported_tasks: List[str]
+class FunctionCall:
+    """Represents a function call with parameters"""
+    tool_name: str
+    function_name: str
+    parameters: Dict[str, Any]
+
+class FunctionExecutor:
+    """Executes predefined functions from tool classes"""
+    
+    def __init__(self):
+        self.tools = {
+            "TorchXrayVision": TorchXrayVisionClassifier(),
+            "ChestXRayAnatomySegmentation": ChestXrayAnatomySegmentation(),
+            "FactCheXcker CarinaNet": ETTDetection(),
+            "BoneFractureDetection": BoneFractureDetection(),
+            "MAIRA-2": MAIRA2Detection()
+        }
+    
+    def execute_function(self, function_call: FunctionCall) -> Dict[str, Any]:
+        """Execute a function call"""
+        try:
+            tool = self.tools.get(function_call.tool_name)
+            if not tool:
+                return {"error": f"Tool {function_call.tool_name} not found"}
+            
+            # Get the function from the tool
+            function = getattr(tool, function_call.function_name, None)
+            if not function:
+                return {"error": f"Function {function_call.function_name} not found in {function_call.tool_name}"}
+            
+            # Call the function with parameters
+            result = function(**function_call.parameters)
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error executing function: {e}")
+            return {"error": str(e)}
 
 class XrayAgent:
     """
-    Intelligent X-ray analysis agent that automatically selects and uses appropriate tools
-    based on input images and natural language queries.
+     X-ray analysis agent that uses GPT-4.1 to select predefined functions
+    from medical imaging tools based on natural language queries and images.
     """
     
-    def __init__(self, tools_dir: str = "src/tools"):
-        """
-        Initialize the XrayAgent
-        
-        Args:
-            tools_dir: Directory containing tool JSON files
-        """
+    def __init__(self, tools_dir: str = "./tools"):
+        """Initialize the  XrayAgent"""
         self.tools_dir = Path(tools_dir)
         self.client = get_azure_client()
-        self.tools = {}
-        self.load_tools()
+        self.function_executor = FunctionExecutor()
+        self.available_functions = self._get_available_functions()
         
-    def load_tools(self):
-        """Load all available tools from JSON files"""
-        logger.info(f"Loading tools from {self.tools_dir}")
-        
-        tool_files = glob.glob(str(self.tools_dir / "*.json"))
-        
-        for tool_file in tool_files:
-            try:
-                with open(tool_file, 'r') as f:
-                    tool_data = json.load(f)
-                
-                # Extract supported tasks from tool description and name
-                supported_tasks = self._extract_supported_tasks(tool_data)
-                
-                tool_info = ToolInfo(
-                    name=tool_data.get("tool_name", ""),
-                    description=tool_data.get("tool_description", ""),
-                    author=tool_data.get("tool_author", ""),
-                    version=tool_data.get("tool_version", ""),
-                    input_schema=tool_data.get("input_schema", {}),
-                    output_schema=tool_data.get("output_schema", {}),
-                    demo_commands=tool_data.get("demo_commands", []),
-                    file_path=tool_file,
-                    supported_tasks=supported_tasks
-                )
-                
-                self.tools[tool_info.name] = tool_info
-                logger.info(f"Loaded tool: {tool_info.name}")
-                
-            except Exception as e:
-                logger.error(f"Error loading tool from {tool_file}: {e}")
-        
-        logger.info(f"Successfully loaded {len(self.tools)} tools")
-
-    def _extract_supported_tasks(self, tool_data: dict) -> List[str]:
-        """Extract supported tasks from tool data"""
-        tasks = []
-        name = tool_data.get("tool_name", "").lower()
-        description = tool_data.get("tool_description", "").lower()
-        
-        # Map common keywords to task types
-        task_keywords = {
-            "classification": ["class", "classify", "pathology", "disease"],
-            "detection": ["detect", "localization", "bbox", "object"],
-            "segmentation": ["segment", "mask", "anatomy", "structure"],
-            "vqa": ["question", "answering", "vqa", "query"],
-            "measurement": ["measure", "distance", "ratio", "metric"],
-            "grounding": ["grounding", "localize", "position"]
+    def _get_available_functions(self) -> Dict[str, Dict[str, Any]]:
+        """Get information about all available functions"""
+        functions = {
+            "TorchXrayVision": {
+                "classify_pathologies": {
+                    "description": "Classify pathologies in chest X-ray",
+                    "parameters": ["image_path", "model_type", "threshold"]
+                },
+                "compare_models": {
+                    "description": "Compare different model predictions on the same image",
+                    "parameters": ["image_path", "model_types"]
+                },
+                "get_model_info": {
+                    "description": "Get information about a specific model",
+                    "parameters": ["model_type"]
+                }
+            },
+            "ChestXRayAnatomySegmentation": {
+                "segment_anatomy": {
+                    "description": "Segment anatomical structures in chest X-ray",
+                    "parameters": ["image_path", "return_masks"]
+                },
+                "process_folder": {
+                    "description": "Process all images in a folder and generate mask images",
+                    "parameters": ["folder_path", "return_masks"]
+                },
+                "calculate_clinical_measurements": {
+                    "description": "Calculate clinical measurements from segmentation",
+                    "parameters": ["image_path"]
+                },
+                "analyze_structure_positions": {
+                    "description": "Analyze anatomical structure positions and relationships",
+                    "parameters": ["image_path"]
+                }
+            },
+            "FactCheXcker CarinaNet": {
+                "detect_ett_and_carina": {
+                    "description": "Detect endotracheal tube and carina in chest X-ray",
+                    "parameters": ["image_path", "confidence_threshold"]
+                },
+                "assess_ett_positioning": {
+                    "description": "Assess ETT positioning quality",
+                    "parameters": ["image_path"]
+                }
+            },
+            "BoneFractureDetection": {
+                "detect_fractures": {
+                    "description": "Detect bone fractures in X-ray image",
+                    "parameters": ["image_path", "confidence_threshold"]
+                },
+                "assess_fracture_severity": {
+                    "description": "Assess the severity of detected fractures",
+                    "parameters": ["image_path"]
+                },
+                "analyze_bone_health": {
+                    "description": "Analyze overall bone health and density",
+                    "parameters": ["image_path"]
+                }
+            },
+            "MAIRA-2": {
+                "ground_phrase": {
+                    "description": "Ground a medical phrase in chest X-ray image",
+                    "parameters": ["image_path", "phrase"]
+                },
+                "detect_multiple_phrases": {
+                    "description": "Ground multiple medical phrases in chest X-ray",
+                    "parameters": ["image_path", "phrases"]
+                },
+                "detect_common_findings": {
+                    "description": "Detect common chest X-ray findings using predefined phrases",
+                    "parameters": ["image_path"]
+                },
+                "ground_anatomical_structures": {
+                    "description": "Ground anatomical structures in chest X-ray",
+                    "parameters": ["image_path"]
+                }
+            }
         }
-        
-        for task, keywords in task_keywords.items():
-            if any(keyword in name or keyword in description for keyword in keywords):
-                tasks.append(task)
-        
-        return tasks if tasks else ["general"]
+        return functions
 
     def encode_image(self, image_path: str) -> str:
         """Encode image to base64 for API calls"""
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
 
-    def analyze_query(self, query: str, image_path: str) -> Dict[str, Any]:
+    def select_functions(self, query: str, image_path: str) -> Dict[str, Any]:
         """
-        Use GPT-4.1 to analyze the query and determine which tools to use
-        
-        Args:
-            query: User's natural language query
-            image_path: Path to the input image
-            
-        Returns:
-            Dictionary containing tool selection and reasoning
+        Use GPT-4.1 to select appropriate functions and parameters for the query
         """
-        # Prepare tool descriptions for GPT
-        tool_descriptions = []
-        for name, tool in self.tools.items():
-            tool_desc = {
-                "name": name,
-                "description": tool.description,
-                "supported_tasks": tool.supported_tasks,
-                "capabilities": self._get_tool_capabilities(tool)
-            }
-            tool_descriptions.append(tool_desc)
-        
-        # Encode image
+        # Encode image for analysis
         base64_image = self.encode_image(image_path)
         
-        system_prompt = f"""You are an intelligent medical imaging agent that helps select appropriate tools for X-ray analysis based on user queries.
+        system_prompt = f"""You are an expert medical imaging AI assistant. Your task is to analyze a medical query and X-ray image, then select the most appropriate predefined functions to answer the question.
 
-Available tools:
-{json.dumps(tool_descriptions, indent=2)}
+    Available Functions:
+    {json.dumps(self.available_functions, indent=2)}
 
-Your task is to:
-1. Analyze the user's query and the provided X-ray image
-2. Determine which tool(s) would be most appropriate to answer the query
-3. Provide reasoning for your selection
-4. Suggest the order of tool execution if multiple tools are needed
+    Your responsibilities:
+    1. Analyze the user's query and the X-ray image
+    2. Select function(s) needed to answer the question
+    3. Determine the correct parameters for each function call
+    4. Return a structured response with function calls
 
-Respond with a JSON object containing:
-- "selected_tools": List of tool names to use
-- "reasoning": Explanation of why these tools were selected
-- "execution_order": Suggested order of execution
-- "query_type": Classification of the query (e.g., "diagnostic", "measurement", "educational")
-- "confidence": Confidence score (0-1) in tool selection
-"""
+    Response Format:
+    Return a JSON object with:
+    - "reasoning": Explanation of function selection and approach
+    - "function_calls": List of function calls with tool_name, function_name, and parameters
+    - "expected_output": Description of what the functions should produce
+
+    Parameter Guidelines:
+    - image_path: Always use "{image_path}"
+    - question: Use the user's query or modified version for VQA
+    - context: Add relevant clinical context if needed
+    - threshold: Use 0.5 as default confidence threshold
+    - model_type: Use "densenet121-res224-all" as default for TorchXrayVision
+    - return_masks: Use false unless specifically requested
+    """
 
         user_prompt = f"""
-Please analyze this chest X-ray image and determine which tools would be best suited to answer the following query:
+Analyze this chest X-ray image and select the appropriate functions to answer the following query:
 
 Query: "{query}"
 
-Consider:
-- What specific information is the user seeking?
-- Which tools have the capabilities to provide that information?
-- Are multiple tools needed to fully answer the query?
-- What would be the logical order of execution?
+Requirements:
+1. Select the most appropriate function(s) from the available options
+2. Determine the correct parameters for each function call
+3. Consider what type of analysis is needed (VQA, classification, segmentation, etc.)
+4. Return the function calls in a logical order
+
+The response should be in JSON format with the structure specified above.
 """
 
         try:
@@ -217,192 +258,156 @@ Consider:
                 temperature=0.1
             )
             
-            # Parse the response
             response_text = response.choices[0].message.content
             
             # Try to extract JSON from response
             try:
-                # Find JSON in the response
                 start_idx = response_text.find('{')
                 end_idx = response_text.rfind('}') + 1
                 json_str = response_text[start_idx:end_idx]
                 analysis = json.loads(json_str)
             except:
-                # Fallback parsing
+                # Fallback to VQA
                 analysis = {
-                    "selected_tools": ["MedGemma-VQA"],  # Default to VQA
-                    "reasoning": "Fallback to VQA tool due to parsing error",
-                    "execution_order": ["MedGemma-VQA"],
-                    "query_type": "general",
-                    "confidence": 0.5
+                    "reasoning": "JSON parsing failed, defaulting to VQA",
+                    "function_calls": [{
+                        "tool_name": "TorchXrayVision",
+                        "function_name": "classify_pathologies",
+                        "parameters": {
+                            "image_path": image_path,
+                            "model_type": "densenet121-res224-all",
+                            "threshold": 0.5
+                        }
+                    }],
+                    "expected_output": "VQA response"
                 }
             
             return analysis
             
         except Exception as e:
-            logger.error(f"Error in query analysis: {e}")
-            # Return default analysis
+            logger.error(f"Error in function selection: {e}")
             return {
-                "selected_tools": ["MedGemma-VQA"],
-                "reasoning": f"Error in analysis, defaulting to VQA: {e}",
-                "execution_order": ["MedGemma-VQA"],
-                "query_type": "general",
-                "confidence": 0.3
+                "reasoning": f"Error occurred: {e}",
+                "function_calls": [{
+                    "tool_name": "TorchXrayVision",
+                    "function_name": "classify_pathologies",
+                    "parameters": {
+                        "image_path": image_path,
+                        "model_type": "densenet121-res224-all",
+                        "threshold": 0.5
+                    }
+                }],
+                "expected_output": "Fallback VQA response"
             }
 
-    def _get_tool_capabilities(self, tool: ToolInfo) -> List[str]:
-        """Extract key capabilities from tool information"""
-        capabilities = []
-        
-        # Extract from description
-        description_lower = tool.description.lower()
-        
-        capability_keywords = {
-            "pathology_detection": ["pathology", "disease", "abnormal"],
-            "anatomy_identification": ["anatomy", "structure", "organ"],
-            "measurement": ["measure", "distance", "ratio", "size"],
-            "positioning": ["position", "placement", "location"],
-            "question_answering": ["question", "answer", "query", "vqa"],
-            "classification": ["classify", "classification", "category"],
-            "localization": ["localize", "detect", "find", "locate"],
-            "segmentation": ["segment", "mask", "boundary"]
-        }
-        
-        for capability, keywords in capability_keywords.items():
-            if any(keyword in description_lower for keyword in keywords):
-                capabilities.append(capability)
-        
-        return capabilities if capabilities else ["general_analysis"]
-
-    def execute_tool(self, tool_name: str, image_path: str, query: str = "", **kwargs) -> Dict[str, Any]:
+    def synthesize_results(self, query: str, image_path: str, analysis: Dict[str, Any], results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Execute a specific tool with the given parameters
-        
-        Args:
-            tool_name: Name of the tool to execute
-            image_path: Path to the input image
-            query: Optional query for VQA tools
-            **kwargs: Additional parameters for the tool
-            
-        Returns:
-            Dictionary containing tool execution results
+        Use GPT-4.1 to synthesize function results into a structured answer
         """
-        if tool_name not in self.tools:
-            return {"error": f"Tool {tool_name} not found"}
+        # Encode image for final analysis
+        base64_image = self.encode_image(image_path)
         
-        tool = self.tools[tool_name]
-        
-        try:
-            # Create output directory
-            output_dir = tempfile.mkdtemp(prefix=f"{tool_name}_")
+        # Prepare results summary for GPT
+        results_summary = []
+        for result_data in results:
+            func_call = result_data["function_call"]
+            result = result_data["result"]
             
-            if tool_name == "MedGemma-VQA":
-                return self._execute_vqa_tool(tool, image_path, query, output_dir)
-            elif tool_name == "TorchXrayVision":
-                return self._execute_classification_tool(tool, image_path, output_dir)
-            elif tool_name == "FactCheXcker CarinaNet":
-                return self._execute_detection_tool(tool, image_path, output_dir)
-            elif tool_name == "ChestXRayAnatomySegmentation":
-                return self._execute_segmentation_tool(tool, image_path, output_dir)
-            elif tool_name == "BoneFractureDetection":
-                return self._execute_bone_fracture_detection_tool(tool, image_path, output_dir)
+            if "error" not in result:
+                results_summary.append({
+                    "function": f"{func_call['tool_name']}.{func_call['function_name']}",
+                    "result": result
+                })
             else:
-                return self._execute_generic_tool(tool, image_path, output_dir, query)
-                
-        except Exception as e:
-            logger.error(f"Error executing tool {tool_name}: {e}")
-            return {"error": f"Tool execution failed: {e}"}
+                results_summary.append({
+                    "function": f"{func_call['tool_name']}.{func_call['function_name']}",
+                    "error": result["error"]
+                })
+        
+        system_prompt = """You are an expert radiologist providing clear, concise answers to medical questions about X-ray images. Your task is to synthesize the results from multiple medical imaging tools into a single, coherent answer.
 
-    def _execute_vqa_tool(self, tool: ToolInfo, image_path: str, query: str, output_dir: str) -> Dict[str, Any]:
-        """Execute VQA tool (MedGemma)"""
-        # For now, we'll return a simulated response since the actual tool execution
-        # requires specific environment setup
-        return {
-            "tool_name": tool.name,
-            "query": query,
-            "image_path": image_path,
-            "answer": f"[Simulated VQA Response for: {query}] This would contain the actual medical VQA response analyzing the chest X-ray image for the specific question asked.",
-            "confidence_level": "Moderate",
-            "key_findings": ["Chest X-ray analysis", "Medical interpretation"],
-            "status": "simulated"
-        }
+Guidelines:
+1. Answer the user's original question directly and clearly
+2. Use the tool results to support your answer
+3. Provide a structured response with key findings
+4. Use medical terminology appropriately but ensure clarity
+5. If results are conflicting, acknowledge the discrepancy
+6. Only include information relevant to answering the question
 
-    def _execute_classification_tool(self, tool: ToolInfo, image_path: str, output_dir: str) -> Dict[str, Any]:
-        """Execute classification tool (TorchXrayVision)"""
-        return {
-            "tool_name": tool.name,
-            "image_path": image_path,
-            "predictions": {
-                "pathology_scores": {
-                    "Pneumonia": 0.12,
-                    "Cardiomegaly": 0.34,
-                    "Atelectasis": 0.08,
-                    "Infiltration": 0.15,
-                    "Mass": 0.03,
-                    "Nodule": 0.07,
-                    "Pneumothorax": 0.02
+Response Format:
+Return a JSON object with:
+- "answer": Direct answer to the user's question (2-3 sentences)
+- "key_findings": List of main findings relevant to the question
+- "confidence": Overall confidence level (High/Moderate/Low)
+- "recommendations": Any relevant clinical recommendations (if applicable)
+- "technical_notes": Brief technical details if relevant to the answer"""
+
+        user_prompt = f"""
+Original Question: "{query}"
+
+Analysis Reasoning: {analysis.get('reasoning', 'No reasoning provided')}
+
+Tool Results:
+{json.dumps(results_summary, indent=2, default=str)}
+
+Please provide a structured answer to the original question based on these tool results and your analysis of the X-ray image.
+"""
+
+        try:
+            response = self.client.chat.completions.create(
+                model=AZURE_DEPLOYMENT_NAME,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": user_prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=800,
+                temperature=0.1
+            )
+            
+            response_text = response.choices[0].message.content
+            
+            # Try to extract JSON from response
+            try:
+                start_idx = response_text.find('{')
+                end_idx = response_text.rfind('}') + 1
+                json_str = response_text[start_idx:end_idx]
+                structured_answer = json.loads(json_str)
+            except:
+                # Fallback structure
+                structured_answer = {
+                    "answer": response_text,
+                    "key_findings": ["Analysis completed"],
+                    "confidence": "Moderate",
+                    "recommendations": [],
+                    "technical_notes": "JSON parsing failed, returning raw response"
                 }
-            },
-            "status": "simulated"
-        }
-
-    def _execute_detection_tool(self, tool: ToolInfo, image_path: str, output_dir: str) -> Dict[str, Any]:
-        """Execute detection tool (FactCheXcker CarinaNet)"""
-        return {
-            "tool_name": tool.name,
-            "image_path": image_path,
-            "ett_detected": False,
-            "carina_detected": True,
-            "positioning_status": "No ETT detected",
-            "carina_confidence": 0.87,
-            "status": "simulated"
-        }
-
-    def _execute_segmentation_tool(self, tool: ToolInfo, image_path: str, output_dir: str) -> Dict[str, Any]:
-        """Execute segmentation tool (ChestXRayAnatomySegmentation)"""
-        return {
-            "tool_name": tool.name,
-            "image_path": image_path,
-            "anatomical_structures": ["Heart", "Left Lung", "Right Lung", "Spine", "Ribs"],
-            "clinical_measurements": {
-                "cardio_thoracic_ratio": 0.45,
-                "spine_center_distance": 124.5
-            },
-            "status": "simulated"
-        }
-
-    def _execute_generic_tool(self, tool: ToolInfo, image_path: str, output_dir: str, query: str) -> Dict[str, Any]:
-        """Execute a generic tool"""
-        return {
-            "tool_name": tool.name,
-            "image_path": image_path,
-            "query": query,
-            "result": f"Generic execution result for {tool.name}",
-            "status": "simulated"
-        }
-
-    def _execute_bone_fracture_detection_tool(self, tool: ToolInfo, image_path: str, output_dir: str) -> Dict[str, Any]:
-        """Execute bone fracture detection tool (BoneFractureDetection)"""
-        return {
-            "tool_name": tool.name,
-            "image_path": image_path,
-            "predictions": {
-                "fracture_status": "Fractured",
-                "confidence": 0.95
-            },
-            "status": "simulated"
-        }
+            
+            return structured_answer
+            
+        except Exception as e:
+            logger.error(f"Error in result synthesis: {e}")
+            return {
+                "answer": f"Unable to synthesize results due to error: {e}",
+                "key_findings": ["Error in synthesis"],
+                "confidence": "Low",
+                "recommendations": [],
+                "technical_notes": str(e)
+            }
 
     def process_query(self, image_path: str, query: str) -> Dict[str, Any]:
         """
-        Main method to process a query with an image
-        
-        Args:
-            image_path: Path to the X-ray image
-            query: Natural language query about the image
-            
-        Returns:
-            Comprehensive results from selected tools
+        Main method to process a query with an image using predefined functions
         """
         logger.info(f"Processing query: '{query}' for image: {image_path}")
         
@@ -410,86 +415,53 @@ Consider:
         if not os.path.exists(image_path):
             return {"error": f"Image file not found: {image_path}"}
         
-        # Analyze query to select appropriate tools
-        analysis = self.analyze_query(query, image_path)
+        # Select functions using GPT-4.1
+        function_selection = self.select_functions(query, image_path)
         
-        # Execute selected tools
-        results = {
+        # Execute selected functions
+        function_results = []
+        for func_call_data in function_selection.get("function_calls", []):
+            func_call = FunctionCall(
+                tool_name=func_call_data["tool_name"],
+                function_name=func_call_data["function_name"],
+                parameters=func_call_data["parameters"]
+            )
+            
+            result = self.function_executor.execute_function(func_call)
+            function_results.append({
+                "function_call": func_call_data,
+                "result": result
+            })
+        
+        # Synthesize results using GPT-4.1
+        analysis = {
+            "reasoning": function_selection.get("reasoning", ""),
+            "selected_functions": [fc["function_name"] for fc in function_selection.get("function_calls", [])],
+            "expected_output": function_selection.get("expected_output", "")
+        }
+        
+        structured_answer = self.synthesize_results(query, image_path, analysis, function_results)
+        
+        # Prepare comprehensive response
+        response = {
             "query": query,
             "image_path": image_path,
             "analysis": analysis,
-            "tool_results": {},
-            "summary": ""
+            "results": structured_answer,
+            "summary": structured_answer.get("answer", "No answer generated")
         }
         
-        for tool_name in analysis.get("execution_order", []):
-            logger.info(f"Executing tool: {tool_name}")
-            tool_result = self.execute_tool(tool_name, image_path, query)
-            results["tool_results"][tool_name] = tool_result
-        
-        # Generate comprehensive summary
-        results["summary"] = self._generate_summary(results)
-        
-        return results
+        return response
 
-    def _generate_summary(self, results: Dict[str, Any]) -> str:
-        """Generate a comprehensive summary of all tool results"""
-        summary_parts = []
-        
-        query = results.get("query", "")
-        analysis = results.get("analysis", {})
-        
-        summary_parts.append(f"Query Analysis: {analysis.get('reasoning', 'No reasoning provided')}")
-        summary_parts.append(f"Selected Tools: {', '.join(analysis.get('selected_tools', []))}")
-        
-        # Summarize each tool's results
-        for tool_name, tool_result in results.get("tool_results", {}).items():
-            if "error" not in tool_result:
-                summary_parts.append(f"\n{tool_name} Results:")
-                
-                if tool_name == "MedGemma-VQA":
-                    summary_parts.append(f"  Answer: {tool_result.get('answer', 'No answer')}")
-                elif tool_name == "TorchXrayVision":
-                    scores = tool_result.get("predictions", {}).get("pathology_scores", {})
-                    top_findings = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:3]
-                    summary_parts.append(f"  Top pathology predictions: {top_findings}")
-                elif tool_name == "ChestXRayAnatomySegmentation":
-                    ctr = tool_result.get("clinical_measurements", {}).get("cardio_thoracic_ratio", "N/A")
-                    summary_parts.append(f"  Cardio-Thoracic Ratio: {ctr}")
-                elif tool_name == "FactCheXcker CarinaNet":
-                    status = tool_result.get("positioning_status", "Unknown")
-                    summary_parts.append(f"  ETT Positioning: {status}")
-        
-        return "\n".join(summary_parts)
+    def list_available_functions(self) -> Dict[str, Any]:
+        """Return information about all available functions"""
+        return self.available_functions
 
-    def list_available_tools(self) -> Dict[str, Dict[str, Any]]:
-        """Return information about all available tools"""
-        tool_info = {}
-        for name, tool in self.tools.items():
-            tool_info[name] = {
-                "description": tool.description,
-                "supported_tasks": tool.supported_tasks,
-                "capabilities": self._get_tool_capabilities(tool),
-                "author": tool.author,
-                "version": tool.version
-            }
-        return tool_info
 
 # Example usage
 if __name__ == "__main__":
-    # Initialize the agent
+    # Initialize the  agent
     agent = XrayAgent()
-    
-    # Example queries
-    sample_queries = [
-        "What pathologies do you see in this chest X-ray?",
-        "Is there evidence of pneumonia?",
-        "What is the cardio-thoracic ratio?",
-        "Is the endotracheal tube positioned correctly?",
-        "Can you segment the anatomical structures?",
-        "What is your overall impression of this X-ray?"
-    ]
-    
-    # Print available tools
-    print("Available Tools:")
-    print(json.dumps(agent.list_available_tools(), indent=2)) 
+
+    result = agent.process_query("../data/xray.jpg", "Is there evidence of ETT in this X-ray? If so, where is it located?")
+    print(json.dumps(result, indent=2, default=str)) 
