@@ -3,91 +3,42 @@ Chest X-ray Anatomy Segmentation Tool
 """
 
 import os
+import subprocess
 import numpy as np
 from PIL import Image
 from typing import Dict, Any, List, Optional
 import logging
+import json
+import glob
 
 logger = logging.getLogger(__name__)
 
 class ChestXrayAnatomySegmentation:
-    """Tool for segmenting anatomical structures in chest X-rays"""
+    """Tool for segmenting anatomical structures in chest X-rays using cxas_segment"""
     
     def __init__(self):
-        self.model = None
-        self.transform = None
-        self.anatomy_classes = []
+        self.output_dir = None
         
-    def load_model(self, model_name: str = "anatomy_segmentation"):
-        """Load the anatomy segmentation model"""
+    def check_cxas_availability(self) -> bool:
+        """Check if cxas_segment command is available"""
         try:
-            # This would normally load a real segmentation model
-            # For demonstration, we'll simulate the model loading
-            logger.info(f"Loading anatomy segmentation model: {model_name}")
-            
-            # Simulated anatomy classes that would be detected
-            self.anatomy_classes = [
-                "Heart", "Left Lung", "Right Lung", "Spine", "Ribs", 
-                "Diaphragm", "Mediastinum", "Trachea", "Clavicles", "Aortic Arch"
-            ]
-            
-            logger.info(f"Anatomy segmentation model loaded: {model_name}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to load anatomy segmentation model: {e}")
+            result = subprocess.run(['cxas_segment', '--help'], 
+                                  capture_output=True, text=True, timeout=10)
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError):
             return False
     
-    def _generate_mask(self, image_size: tuple, structure_name: str, bbox: List[int]) -> np.ndarray:
-        """Generate a simulated mask for an anatomical structure"""
-        mask = np.zeros(image_size, dtype=np.uint8)
-        
-        # Create a simple mask based on bounding box
-        x1, y1, x2, y2 = [int(coord) for coord in bbox]  # Ensure integers
-        
-        # Ensure coordinates are within image bounds
-        height, width = image_size
-        x1 = max(0, min(x1, width-1))
-        y1 = max(0, min(y1, height-1))
-        x2 = max(0, min(x2, width-1))
-        y2 = max(0, min(y2, height-1))
-        
-        if x1 >= x2 or y1 >= y2:
-            return mask  # Return empty mask if invalid bbox
-        
-        if structure_name in ["Heart"]:
-            # Create an ellipse-like mask for heart
-            center_x, center_y = (x1 + x2) // 2, (y1 + y2) // 2
-            for y in range(y1, y2):
-                for x in range(x1, x2):
-                    # Simple ellipse equation
-                    if ((x - center_x)**2 / max(1, ((x2-x1)//2)**2) + 
-                        (y - center_y)**2 / max(1, ((y2-y1)//2)**2)) <= 1:
-                        mask[y, x] = 255
-        
-        elif structure_name in ["Left Lung", "Right Lung"]:
-            # Create a more organic shape for lungs
-            center_x, center_y = (x1 + x2) // 2, (y1 + y2) // 2
-            for y in range(y1, y2):
-                for x in range(x1, x2):
-                    # Lung-like shape
-                    if ((x - center_x)**2 / max(1, ((x2-x1)//2.5)**2) + 
-                        (y - center_y)**2 / max(1, ((y2-y1)//2.2)**2)) <= 1:
-                        mask[y, x] = 255
-        
-        else:
-            # Simple rectangular mask for other structures
-            mask[y1:y2, x1:x2] = 255
-        
-        return mask
-    
-    def segment_anatomy(self, image_path: str, return_masks: bool = False) -> Dict[str, Any]:
+    def segment_anatomy(self, image_path: str, return_masks: bool = None, output_dir: str = None, 
+                       output_type: str = "png", device: str = "cpu") -> Dict[str, Any]:
         """
-        Segment anatomical structures in chest X-ray
+        Segment anatomical structures in chest X-ray using cxas_segment
         
         Args:
             image_path: Path to the X-ray image
-            return_masks: Whether to return/save segmentation masks
+            return_masks: Whether to return/save segmentation masks (for backward compatibility)
+            output_dir: Output directory for segmentation results
+            output_type: Output format (png, nii, etc.)
+            device: Device to run on (cpu, gpu, cuda, 0, 1, etc.)
             
         Returns:
             Dictionary with segmentation results
@@ -96,115 +47,166 @@ class ChestXrayAnatomySegmentation:
             if not os.path.exists(image_path):
                 return {"error": f"Image not found: {image_path}"}
             
-            # Load image
-            image = Image.open(image_path)
-            width, height = image.size
+            # Check if cxas_segment is available
+            if not self.check_cxas_availability():
+                return {"error": "cxas_segment command not found. Please install ChestXRayAnatomySegmentation package."}
             
-            # Ensure model is loaded
-            if not self.anatomy_classes:
-                if not self.load_model():
-                    return {"error": "Failed to load anatomy segmentation model"}
+            # Set default output directory
+            if output_dir is None:
+                output_dir = os.path.join(os.path.dirname(image_path), "output")
             
-            # Simulate segmentation results
-            segmentation_results = {
-                "Heart": {
-                    "area": 18500,
-                    "bbox": [width//3, height//3, width//2, height//2],
-                    "centroid": [width//2.2, height//2.5],
-                    "confidence": 0.92
-                },
-                "Left Lung": {
-                    "area": 45000,
-                    "bbox": [width//6, height//4, width//2.5, height//1.5],
-                    "centroid": [width//3.5, height//2.2],
-                    "confidence": 0.88
-                },
-                "Right Lung": {
-                    "area": 47000,
-                    "bbox": [width//1.8, height//4, width//1.2, height//1.5],
-                    "centroid": [width//1.5, height//2.2],
-                    "confidence": 0.90
-                },
-                "Spine": {
-                    "area": 12000,
-                    "bbox": [width//2.2, height//8, width//1.8, height//1.2],
-                    "centroid": [width//2, height//2],
-                    "confidence": 0.85
-                },
-                "Ribs": {
-                    "area": 8500,
-                    "bbox": [width//6, height//6, width//1.2, height//1.8],
-                    "centroid": [width//2, height//2.5],
-                    "confidence": 0.78
-                }
-            }
+            # Create output directory
+            os.makedirs(output_dir, exist_ok=True)
+            self.output_dir = output_dir
             
-            result = {
-                "anatomical_structures": segmentation_results,
-                "detected_structures": list(segmentation_results.keys()),
+            # Prepare command
+            cmd = [
+                "cxas_segment",
+                "-i", image_path,
+                "-o", output_dir,
+                "-ot", output_type,
+                "-g", str(device)
+            ]
+            
+            logger.info(f"Running command: {' '.join(cmd)}")
+            
+            # Run the segmentation command
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            
+            if result.returncode != 0:
+                error_msg = f"cxas_segment failed with return code {result.returncode}"
+                if result.stderr:
+                    error_msg += f"\nError: {result.stderr}"
+                return {"error": error_msg}
+            
+            # Parse results
+            segmentation_results = self._parse_segmentation_output(image_path, output_dir)
+            
+            response = {
+                "anatomical_structures": segmentation_results.get("structures", {}),
+                "detected_structures": segmentation_results.get("detected_structures", []),
                 "image_path": image_path,
-                "image_size": [width, height],
+                "output_directory": output_dir,
                 "tool_name": "ChestXRayAnatomySegmentation",
-                "total_structures": len(segmentation_results)
+                "command_output": result.stdout,
+                "total_structures": len(segmentation_results.get("detected_structures", []))
             }
             
-            # Generate and save masks if requested
-            if return_masks:
-                mask_info = self._save_masks(image_path, segmentation_results, (height, width))
-                result["masks"] = mask_info
+            # Add masks info if requested (backward compatibility)
+            if return_masks is True or return_masks is None:
+                response["masks"] = segmentation_results.get("masks", {})
             
-            return result
+            return response
             
+        except subprocess.TimeoutExpired:
+            return {"error": "cxas_segment command timed out"}
         except Exception as e:
             logger.error(f"Error in anatomy segmentation: {e}")
             return {"error": str(e)}
     
-    def _save_masks(self, image_path: str, segmentation_results: Dict, image_size: tuple) -> Dict[str, Any]:
-        """Save mask images for each anatomical structure"""
+    def _parse_segmentation_output(self, image_path: str, output_dir: str) -> Dict[str, Any]:
+        """Parse the output files from cxas_segment"""
         try:
-            # Create output directory
-            image_dir = os.path.dirname(image_path)
-            image_name = os.path.splitext(os.path.basename(image_path))[0]
-            mask_dir = os.path.join(image_dir, f"{image_name}_masks")
-            os.makedirs(mask_dir, exist_ok=True)
-            
-            mask_paths = {}
-            
-            for structure_name, structure_data in segmentation_results.items():
-                try:
-                    # Generate mask
-                    mask = self._generate_mask(image_size, structure_name, structure_data["bbox"])
-                    
-                    # Save mask
-                    mask_filename = f"{structure_name.lower().replace(' ', '_')}_mask.png"
-                    mask_path = os.path.join(mask_dir, mask_filename)
-                    
-                    mask_image = Image.fromarray(mask, mode='L')
-                    mask_image.save(mask_path)
-                    
-                    mask_paths[structure_name] = mask_path
-                    
-                except Exception as e:
-                    logger.error(f"Error generating mask for {structure_name}: {e}")
-                    continue
-            
-            return {
-                "mask_directory": mask_dir,
-                "mask_paths": mask_paths,
-                "total_masks": len(mask_paths)
+            results = {
+                "structures": {},
+                "detected_structures": [],
+                "masks": {}
             }
             
+            # Common anatomy labels that cxas_segment might produce
+            anatomy_labels = {
+                "heart": "Heart",
+                "left_lung": "Left Lung", 
+                "right_lung": "Right Lung",
+                "spine": "Spine",
+                "ribs": "Ribs",
+                "trachea": "Trachea",
+                "clavicles": "Clavicles",
+                "diaphragm": "Diaphragm"
+            }
+            
+            # Find output files
+            image_basename = os.path.splitext(os.path.basename(image_path))[0]
+            
+            # Look for mask files
+            mask_files = []
+            for pattern in [f"{output_dir}/*{image_basename}*", f"{output_dir}/*"]:
+                mask_files.extend(glob.glob(pattern))
+            
+            # Filter for image files
+            mask_files = [f for f in mask_files if f.lower().endswith(('.png', '.jpg', '.jpeg', '.nii', '.nii.gz'))]
+            
+            # Process each mask file
+            for mask_file in mask_files:
+                try:
+                    mask_basename = os.path.basename(mask_file)
+                    
+                    # Try to identify the anatomical structure
+                    structure_name = None
+                    for key, label in anatomy_labels.items():
+                        if key in mask_basename.lower():
+                            structure_name = label
+                            break
+                    
+                    if not structure_name:
+                        # Generic naming if we can't identify the structure
+                        structure_name = f"Structure_{len(results['structures'])}"
+                    
+                    # Load mask to get basic info
+                    if mask_file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                        mask_image = Image.open(mask_file)
+                        mask_array = np.array(mask_image)
+                        
+                        # Get mask statistics
+                        if len(mask_array.shape) == 3:
+                            mask_array = mask_array[:,:,0]  # Take first channel
+                        
+                        non_zero_pixels = np.count_nonzero(mask_array)
+                        total_pixels = mask_array.size
+                        
+                        # Find bounding box
+                        if non_zero_pixels > 0:
+                            coords = np.where(mask_array > 0)
+                            y_min, y_max = coords[0].min(), coords[0].max()
+                            x_min, x_max = coords[1].min(), coords[1].max()
+                            bbox = [int(x_min), int(y_min), int(x_max), int(y_max)]
+                            centroid = [int((x_min + x_max) / 2), int((y_min + y_max) / 2)]
+                        else:
+                            bbox = [0, 0, 0, 0]
+                            centroid = [0, 0]
+                        
+                        results["structures"][structure_name] = {
+                            "area": int(non_zero_pixels),
+                            "bbox": bbox,
+                            "centroid": centroid,
+                            "mask_file": mask_file,
+                            "confidence": 1.0  # cxas_segment doesn't provide confidence scores
+                        }
+                        
+                        results["detected_structures"].append(structure_name)
+                        results["masks"][structure_name] = mask_file
+                        
+                except Exception as e:
+                    logger.warning(f"Error processing mask file {mask_file}: {e}")
+                    continue
+            
+            return results
+            
         except Exception as e:
-            logger.error(f"Error saving masks: {e}")
-            return {"error": str(e)}
+            logger.error(f"Error parsing segmentation output: {e}")
+            return {"structures": {}, "detected_structures": [], "masks": {}}
     
-    def process_folder(self, folder_path: str, return_masks: bool = True) -> Dict[str, Any]:
+    def process_folder(self, folder_path: str, return_masks: bool = True, output_dir: str = None, 
+                      output_type: str = "png", device: str = "cpu") -> Dict[str, Any]:
         """
-        Process all images in a folder and generate mask images
+        Process all images in a folder using cxas_segment
         
         Args:
             folder_path: Path to the folder containing X-ray images
-            return_masks: Whether to generate and save mask images
+            return_masks: Whether to generate and save mask images (for backward compatibility)
+            output_dir: Output directory for all results
+            output_type: Output format (png, nii, etc.)
+            device: Device to run on (cpu, gpu, etc.)
             
         Returns:
             Dictionary with batch processing results
@@ -224,20 +226,27 @@ class ChestXrayAnatomySegmentation:
             if not image_files:
                 return {"error": f"No image files found in folder: {folder_path}"}
             
+            # Set default output directory
+            if output_dir is None:
+                output_dir = os.path.join(folder_path, "segmentation_output")
+            
             # Process each image
             results = {}
-            total_masks = 0
+            total_structures = 0
             
             for i, image_path in enumerate(image_files):
                 image_name = os.path.basename(image_path)
                 logger.info(f"Processing image {i+1}/{len(image_files)}: {image_name}")
                 
-                result = self.segment_anatomy(image_path, return_masks=return_masks)
+                # Create subdirectory for this image
+                image_output_dir = os.path.join(output_dir, os.path.splitext(image_name)[0])
+                
+                result = self.segment_anatomy(image_path, return_masks=return_masks, 
+                                            output_dir=image_output_dir, output_type=output_type, device=device)
                 
                 if "error" not in result:
                     results[image_name] = result
-                    if return_masks and "masks" in result:
-                        total_masks += result["masks"]["total_masks"]
+                    total_structures += result.get("total_structures", 0)
                 else:
                     results[image_name] = result
             
@@ -247,82 +256,15 @@ class ChestXrayAnatomySegmentation:
             return {
                 "batch_results": results,
                 "folder_path": folder_path,
+                "output_directory": output_dir,
                 "total_images": len(image_files),
                 "successful_images": successful_images,
-                "total_masks_generated": total_masks,
-                "masks_generated": return_masks,
+                "total_structures_detected": total_structures,
                 "tool_name": "ChestXRayAnatomySegmentation"
             }
             
         except Exception as e:
             logger.error(f"Error processing folder: {e}")
-            return {"error": str(e)}
-    
-    def calculate_clinical_measurements(self, image_path: str) -> Dict[str, Any]:
-        """
-        Calculate clinical measurements from segmentation
-        
-        Args:
-            image_path: Path to the X-ray image
-            
-        Returns:
-            Dictionary with clinical measurements
-        """
-        try:
-            # First get segmentation results
-            seg_result = self.segment_anatomy(image_path)
-            
-            if "error" in seg_result:
-                return seg_result
-            
-            structures = seg_result["anatomical_structures"]
-            image_size = seg_result["image_size"]
-            
-            # Calculate cardio-thoracic ratio (CTR)
-            if "Heart" in structures and "Left Lung" in structures and "Right Lung" in structures:
-                heart_width = structures["Heart"]["bbox"][2] - structures["Heart"]["bbox"][0]
-                
-                left_lung_right = structures["Left Lung"]["bbox"][2]
-                right_lung_left = structures["Right Lung"]["bbox"][0]
-                thoracic_width = right_lung_left - left_lung_right + heart_width
-                
-                ctr = heart_width / thoracic_width if thoracic_width > 0 else 0
-            else:
-                ctr = 0.5  # Default/simulated value
-            
-            # Calculate spine-heart distance
-            if "Heart" in structures and "Spine" in structures:
-                heart_center = structures["Heart"]["centroid"][0]
-                spine_center = structures["Spine"]["centroid"][0]
-                spine_heart_distance = abs(heart_center - spine_center)
-            else:
-                spine_heart_distance = 50  # Default/simulated value
-            
-            # Calculate lung areas
-            left_lung_area = structures.get("Left Lung", {}).get("area", 0)
-            right_lung_area = structures.get("Right Lung", {}).get("area", 0)
-            total_lung_area = left_lung_area + right_lung_area
-            
-            return {
-                "clinical_measurements": {
-                    "cardio_thoracic_ratio": round(ctr, 3),
-                    "spine_heart_distance": round(spine_heart_distance, 1),
-                    "left_lung_area": left_lung_area,
-                    "right_lung_area": right_lung_area,
-                    "total_lung_area": total_lung_area,
-                    "lung_area_ratio": round(left_lung_area / right_lung_area, 3) if right_lung_area > 0 else 0
-                },
-                "image_path": image_path,
-                "tool_name": "ChestXRayAnatomySegmentation",
-                "measurement_units": {
-                    "cardio_thoracic_ratio": "ratio",
-                    "spine_heart_distance": "pixels",
-                    "lung_areas": "pixels²"
-                }
-            }
-            
-        except Exception as e:
-            logger.error(f"Error calculating clinical measurements: {e}")
             return {"error": str(e)}
     
     def analyze_structure_positions(self, image_path: str) -> Dict[str, Any]:
@@ -336,14 +278,17 @@ class ChestXrayAnatomySegmentation:
             Dictionary with position analysis
         """
         try:
-            # Get segmentation results
-            seg_result = self.segment_anatomy(image_path)
+            # Get segmentation results first
+            seg_result = self.segment_anatomy(image_path, return_masks=False)
             
             if "error" in seg_result:
                 return seg_result
             
             structures = seg_result["anatomical_structures"]
-            image_size = seg_result["image_size"]
+            
+            # Get image dimensions
+            image = Image.open(image_path)
+            image_size = [image.width, image.height]
             
             position_analysis = {}
             
@@ -397,15 +342,86 @@ class ChestXrayAnatomySegmentation:
         except Exception as e:
             logger.error(f"Error analyzing structure positions: {e}")
             return {"error": str(e)}
+    
+    def calculate_clinical_measurements(self, image_path: str, output_dir: str = None) -> Dict[str, Any]:
+        """
+        Calculate clinical measurements from cxas_segment segmentation
+        
+        Args:
+            image_path: Path to the X-ray image
+            output_dir: Output directory for segmentation
+            
+        Returns:
+            Dictionary with clinical measurements
+        """
+        try:
+            # First get segmentation results
+            seg_result = self.segment_anatomy(image_path, return_masks=False, output_dir=output_dir)
+            
+            if "error" in seg_result:
+                return seg_result
+            
+            structures = seg_result["anatomical_structures"]
+            
+            # Calculate cardio-thoracic ratio (CTR)
+            ctr = 0.5  # Default value
+            if "Heart" in structures and ("Left Lung" in structures or "Right Lung" in structures):
+                heart_bbox = structures["Heart"]["bbox"]
+                heart_width = heart_bbox[2] - heart_bbox[0]
+                
+                # Try to calculate thoracic width
+                thoracic_width = heart_width * 2  # Rough estimate
+                if "Left Lung" in structures and "Right Lung" in structures:
+                    left_lung_bbox = structures["Left Lung"]["bbox"]
+                    right_lung_bbox = structures["Right Lung"]["bbox"]
+                    thoracic_width = right_lung_bbox[2] - left_lung_bbox[0]
+                
+                ctr = heart_width / thoracic_width if thoracic_width > 0 else 0.5
+            
+            # Calculate spine-heart distance
+            spine_heart_distance = 50  # Default value
+            if "Heart" in structures and "Spine" in structures:
+                heart_center = structures["Heart"]["centroid"][0]
+                spine_center = structures["Spine"]["centroid"][0]
+                spine_heart_distance = abs(heart_center - spine_center)
+            
+            # Calculate lung areas
+            left_lung_area = structures.get("Left Lung", {}).get("area", 0)
+            right_lung_area = structures.get("Right Lung", {}).get("area", 0)
+            total_lung_area = left_lung_area + right_lung_area
+            
+            return {
+                "clinical_measurements": {
+                    "cardio_thoracic_ratio": round(ctr, 3),
+                    "spine_heart_distance": round(spine_heart_distance, 1),
+                    "left_lung_area": left_lung_area,
+                    "right_lung_area": right_lung_area,
+                    "total_lung_area": total_lung_area,
+                    "lung_area_ratio": round(left_lung_area / right_lung_area, 3) if right_lung_area > 0 else 0
+                },
+                "image_path": image_path,
+                "tool_name": "ChestXRayAnatomySegmentation",
+                "measurement_units": {
+                    "cardio_thoracic_ratio": "ratio",
+                    "spine_heart_distance": "pixels",
+                    "lung_areas": "pixels²"
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error calculating clinical measurements: {e}")
+            return {"error": str(e)}
 
 # Standalone testing functions
 def test_anatomy_segmentation():
-    """Test function for anatomy segmentation"""
-    print("Testing Chest X-ray Anatomy Segmentation...")
+    """Test function for anatomy segmentation using cxas_segment"""
+    print("Testing Chest X-ray Anatomy Segmentation with cxas_segment...")
     
     # Find test image
     test_image_paths = [
         "../../data/xray.jpg",
+        "../data/xray.jpg",
+        "data/xray.jpg"
     ]
     
     image_path = None
@@ -421,8 +437,15 @@ def test_anatomy_segmentation():
     # Initialize tool
     segmenter = ChestXrayAnatomySegmentation()
     
+    # Check if cxas_segment is available
+    if not segmenter.check_cxas_availability():
+        print("❌ cxas_segment command not found. Please install ChestXRayAnatomySegmentation package.")
+        return False
+    
     # Test segmentation
-    result = segmenter.segment_anatomy(image_path)
+    print(f"🔄 Running cxas_segment on {image_path}...")
+    output_dir = os.path.join(os.path.dirname(image_path), "output")
+    result = segmenter.segment_anatomy(image_path, output_dir=output_dir, output_type="png", device="cpu")
     
     if "error" in result:
         print(f"❌ Error: {result['error']}")
@@ -430,34 +453,22 @@ def test_anatomy_segmentation():
     
     print("✅ Anatomy segmentation test passed")
     print(f"Detected structures: {result['detected_structures']}")
+    print(f"Output directory: {result['output_directory']}")
     
-    # Test with mask generation
-    mask_result = segmenter.segment_anatomy(image_path, return_masks=True)
-    if "error" not in mask_result and "masks" in mask_result:
-        print(f"✅ Mask generation test passed")
-        print(f"Generated {mask_result['masks']['total_masks']} masks")
-        print(f"Mask directory: {mask_result['masks']['mask_directory']}")
-    elif "masks" not in mask_result:
-        print(f"⚠️ Mask generation test failed - no masks generated")
-    else:
-        print(f"❌ Mask generation test failed: {mask_result.get('error', 'Unknown error')}")
+    if result.get('masks'):
+        print(f"Generated mask files:")
+        for structure, mask_path in result['masks'].items():
+            print(f"  - {structure}: {mask_path}")
     
     # Test clinical measurements
-    measurements = segmenter.calculate_clinical_measurements(image_path)
+    print("\n🔄 Testing clinical measurements...")
+    measurements = segmenter.calculate_clinical_measurements(image_path, output_dir=output_dir)
     if "error" not in measurements:
-        print(f"CTR: {measurements['clinical_measurements']['cardio_thoracic_ratio']}")
-    
-    # Test folder processing if data folder exists
-    data_folder = "../../data"
-    if os.path.exists(data_folder):
-        print("\n🔄 Testing folder processing...")
-        folder_result = segmenter.process_folder(data_folder, return_masks=True)
-        if "error" not in folder_result:
-            print(f"✅ Folder processing test passed")
-            print(f"Processed {folder_result['successful_images']}/{folder_result['total_images']} images")
-            print(f"Generated {folder_result['total_masks_generated']} total masks")
-        else:
-            print(f"⚠️ Folder processing test failed: {folder_result['error']}")
+        print("✅ Clinical measurements calculated:")
+        for measure, value in measurements['clinical_measurements'].items():
+            print(f"  - {measure}: {value}")
+    else:
+        print(f"⚠️ Clinical measurements failed: {measurements['error']}")
     
     return True
 

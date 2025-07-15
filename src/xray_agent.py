@@ -19,11 +19,11 @@ except ImportError:
     raise ImportError("OpenAI library is required. Install with: pip install openai>=1.0.0")
 
 # Import tool classes
-from tools.torchxrayvision_classifier import TorchXrayVisionClassifier
-from tools.anatomy_segmentation import ChestXrayAnatomySegmentation
-from tools.ett_detection import ETTDetection
-from tools.bone_fracture_detection import BoneFractureDetection
-from tools.maira_2 import MAIRA2Detection
+from .tools.torchxrayvision_classifier import TorchXrayVisionClassifier
+from .tools.anatomy_segmentation import ChestXrayAnatomySegmentation
+from .tools.ett_detection import ETTDetection
+from .tools.bone_fracture_detection import BoneFractureDetection
+from .tools.maira_2 import MAIRA2Detection
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
