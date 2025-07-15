@@ -1,0 +1,23 @@
+
+INSTRUCTIONS FOR SETTING UP THE CHEST X-RAY IMAGE
+===============================================
+
+To run the anatomy segmentation test, you need to:
+
+1. Save the chest X-ray image you provided as 'xray.jpg' in this directory:
+   /Users/melisozvardar/Desktop/xRAYaGENT/
+
+2. The image should be the chest X-ray you showed (the one with bilateral lung infiltrates).
+
+3. Once saved, run this script again: python test_xray_analysis.py
+
+The test will create a comprehensive analysis folder called 'xray_masks' containing:
+- Bounding box visualizations for all bones and organs
+- Individual cropped images of each detected structure  
+- Segmentation masks
+- JSON and CSV metadata files
+- A detailed README explaining the results
+
+Expected structures to be detected:
+🦴 Bones: ribs, spine, clavicle, sternum, scapula
+🫁 Organs: heart, lungs, aorta, mediastinum, diaphragm

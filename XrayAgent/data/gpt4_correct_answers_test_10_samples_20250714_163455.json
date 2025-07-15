@@ -1,0 +1,1129 @@
+{
+  "pGRDNNDTWHG3JNMQV_aGRDN3UZKL54YSA1O_s1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "NORMAL": 0,
+          "FINDINGS": "The findings mention chronic borderline cardiomegaly, which may suggest possible mediastinal widening due to cardiac enlargement. However, there is no explicit statement regarding the mediastinum being normal or abnormal. Therefore, based on the provided information, the mediastinum cannot be confirmed as normal."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": [
+            "COPD"
+          ]
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": [
+            "COPD"
+          ]
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNNDTWHG3JNMQV/GRDN3UZKL54YSA1O/studies/1.2.826.0.1.3680043.8.498.11268440108733375409146007427501424474/series/1.2.826.0.1.3680043.8.498.17719993731945586892496823183467657899/instances/1.2.826.0.1.3680043.8.498.19966206309193896212716526103627556826.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDN7QCXIF34LEKM_aGRDNNKF8I96KFGZA_s1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "NORMAL": 1,
+          "FINDINGS": "Normal mediastinal contours are explicitly noted in the findings."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": [
+            "subsegmental atelectasis or scarring",
+            "bone island or calcified granuloma"
+          ]
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": []
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN7QCXIF34LEKM/GRDNNKF8I96KFGZA/studies/1.2.826.0.1.3680043.8.498.74845409346396804355228529825525865333/series/1.2.826.0.1.3680043.8.498.31672427991265940208092221957183606757/instances/1.2.826.0.1.3680043.8.498.30281677368321056506322262949721911482.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDN0T0I2H9WNP7I_aGRDN6RC4UVXXAA7T_s1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 1
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "NORMAL": 0,
+          "FINDINGS": "There may be calcified lymph nodes in the mediastinum, which is an abnormal finding."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": []
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": [
+            "remote tuberculosis infection",
+            "pleural parenchymal scarring",
+            "volume loss",
+            "calcified granuloma"
+          ]
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN0T0I2H9WNP7I/GRDN6RC4UVXXAA7T/studies/1.2.826.0.1.3680043.8.498.27747643274283460905315749455107466194/series/1.2.826.0.1.3680043.8.498.26329804217592717948426823876272965103/instances/1.2.826.0.1.3680043.8.498.42447277156769361358661481442953966036.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDNV58V9UTYFGW1_aGRDNC828BHB9K5U9_s1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "NORMAL": 0,
+          "FINDINGS": "The report does not mention the mediastinum or provide any information regarding its appearance, so normality cannot be confirmed."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": [
+            "residual pneumonia"
+          ]
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": [
+            "residual pneumonia"
+          ]
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 1,
+          "LOCATION": "right lower lobe, basilar region"
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNV58V9UTYFGW1/GRDNC828BHB9K5U9/studies/1.2.826.0.1.3680043.8.498.69123918010156919178084124984935382544/series/1.2.826.0.1.3680043.8.498.58643153933399792122971935750324057926/instances/1.2.826.0.1.3680043.8.498.13606996335947496159119537855248874312.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDNY7872QREV2EO_aGRDNAKRYN2DFQ2RB_s1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 1,
+          "LOCATION": "medial aspect of the left upper lobe"
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "NORMAL": 0,
+          "FINDINGS": "No information regarding the mediastinum is provided in the findings or impression."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": [
+            "pulmonary nodule",
+            "possible granuloma"
+          ]
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": []
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNY7872QREV2EO/GRDNAKRYN2DFQ2RB/studies/1.2.826.0.1.3680043.8.498.58607277243447564802814001678266398715/series/1.2.826.0.1.3680043.8.498.80015458596488811497364804759276385414/instances/1.2.826.0.1.3680043.8.498.82459995732011781070376364213834262756.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDN2IE3T78U796S_aGRDNQM6TU1EAI1T4_s1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "NORMAL": 0,
+          "FINDINGS": "The mediastinum is not specifically mentioned in the findings or impression, so its status cannot be determined from the provided information."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": []
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": []
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN2IE3T78U796S/GRDNQM6TU1EAI1T4/studies/1.2.826.0.1.3680043.8.498.33032684644134189290844764789234381185/series/1.2.826.0.1.3680043.8.498.97624456444862138496691488670056251887/instances/1.2.826.0.1.3680043.8.498.22880943757615683671912283083551998505.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDNM1YYT0G12RCI_aGRDNOXC7NUVGTN2L_s1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 1,
+          "LOCATION": "right upper lobe"
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "NORMAL": 0,
+          "FINDINGS": "The status of the mediastinum is not mentioned in the findings or impression."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": []
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": [
+            "granulomata"
+          ]
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNM1YYT0G12RCI/GRDNOXC7NUVGTN2L/studies/1.2.826.0.1.3680043.8.498.92777116103336443798486866445701447424/series/1.2.826.0.1.3680043.8.498.18673995994710329248737114614234366194/instances/1.2.826.0.1.3680043.8.498.53593332655841585275693652988624589069.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDN65441NSP44W3_aGRDNDN1W6RRCXO90_s1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "NORMAL": 1,
+          "FINDINGS": "The mediastinum is unremarkable."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": []
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": []
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDN65441NSP44W3/GRDNDN1W6RRCXO90/studies/1.2.826.0.1.3680043.8.498.49385299499771113034852431351765345609/series/1.2.826.0.1.3680043.8.498.40120494811242707099273148614096570413/instances/1.2.826.0.1.3680043.8.498.97160614336623812632819857897047142578.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDNSGFWBWYOSKEB_aGRDN071MZ5PX7AMT_s1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "NORMAL": 0,
+          "FINDINGS": "The report does not mention the mediastinum or its appearance. Therefore, normalcy of the mediastinum cannot be confirmed based on the provided information."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": [
+            "prior granulomatous infection"
+          ]
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": [
+            "prior granulomatous infection"
+          ]
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNSGFWBWYOSKEB/GRDN071MZ5PX7AMT/studies/1.2.826.0.1.3680043.8.498.25691685839266183485778891601283572896/series/1.2.826.0.1.3680043.8.498.32689229656003678472594923608556464564/instances/1.2.826.0.1.3680043.8.498.59157968990249446264136710880369559511.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  },
+  "pGRDNEU7YA5D9QUYO_aGRDNRV9YM4V4HYR9_s1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183": {
+    "question1": {
+      "query": "Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 0
+        }
+      }
+    },
+    "question2": {
+      "query": "Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"DISTANCE\": FLOAT}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "DISTANCE": 0.0
+        }
+      }
+    },
+    "question3": {
+      "query": "Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 1,
+          "LOCATION": "right lung apex"
+        }
+      }
+    },
+    "question4": {
+      "query": "Does this X-ray contain any fractures? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING, \"BOUNDING_BOX\": [xmin, ymin, xmax, ymax]}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": "",
+          "BOUNDING_BOX": []
+        }
+      }
+    },
+    "question5": {
+      "query": "Is the Mediastinum normal? RESPONSE IN JSON WITH {\"NORMAL\": 0 or 1, \"FINDINGS\": STRING}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "NORMAL": 1,
+          "FINDINGS": "Cardiomediastinal silhouette within normal limits."
+        }
+      }
+    },
+    "question6": {
+      "query": "What disease can you find in the left lung? RESPONSE IN JSON WITH {\"LEFT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "LEFT_LUNG": []
+        }
+      }
+    },
+    "question7": {
+      "query": "What disease can you find in the right lung? RESPONSE IN JSON WITH {\"RIGHT_LUNG\": [\"list of diseases\"]}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "RIGHT_LUNG": [
+            "calcified granuloma"
+          ]
+        }
+      }
+    },
+    "question8": {
+      "query": "Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question9": {
+      "query": "Can you locate the Pleural effusion? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question10": {
+      "query": "Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    },
+    "question11": {
+      "query": "Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"LOCATION\": STRING}",
+      "image_path": "processed_deid_png/GRDNEU7YA5D9QUYO/GRDNRV9YM4V4HYR9/studies/1.2.826.0.1.3680043.8.498.86679446779791437447089079730878605183/series/1.2.826.0.1.3680043.8.498.20652689716355340944606897520422368018/instances/1.2.826.0.1.3680043.8.498.20594499062980141209039794760785329490.png",
+      "results": {
+        "answer": {
+          "EXIST": 0,
+          "LOCATION": ""
+        }
+      }
+    }
+  }
+}
