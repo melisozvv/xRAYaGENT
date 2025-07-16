@@ -13,6 +13,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pathlib import Path
 import time
+import numpy as np
 
 # Add the src directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -31,10 +32,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def json_serializer(obj):
+    """Custom JSON serializer for numpy and other non-serializable objects"""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif hasattr(obj, '__dict__'):
+        return obj.__dict__
+    else:
+        return str(obj)
+
 class XrayBatchProcessor:
     """Processes multiple X-ray images with multiple questions using XrayAgent"""
     
-    def __init__(self, data_dir: str = "data", tools_dir: str = "src/tools"):
+    def __init__(self, data_dir: str = "./data", tools_dir: str = "src/tools"):
         """
         Initialize the batch processor
         
@@ -48,7 +62,6 @@ class XrayBatchProcessor:
         
         # Load questions and samples
         self.questions = self._load_questions()
-        self.questions = self.questions[:1]
         self.samples = self._load_samples()
         
         logger.info(f"Loaded {len(self.questions)} questions and {len(self.samples)} samples")
@@ -94,11 +107,13 @@ class XrayBatchProcessor:
         
         for image_path in image_paths:
             # Convert relative path to use processed images
-            processed_path = image_path.replace("../deid_png", "processed_deid_png")
-            full_path = self.data_dir / processed_path
+            processed_path = image_path.replace("../deid_png", "./processed_deid_png")
+            full_path = self.data_dir / Path(processed_path)
             
             if full_path.exists():
                 return str(full_path)
+            else:
+                print(f"Image path {full_path} does not exist")
         
         return None
     
@@ -116,47 +131,37 @@ class XrayBatchProcessor:
         Returns:
             Dictionary containing the analysis results
         """
-        try:
-            # Get valid image path
-            image_path = self._get_valid_image_path(sample)
-            if not image_path:
-                return {
-                    "error": "No valid image path found",
-                    "sample_id": sample_id,
-                    "question": question,
-                    "question_idx": question_idx
-                }
-            
-            # Process the query using XrayAgent
-            logger.info(f"Processing sample {sample_id} with question {question_idx + 1}")
-            result = self.xray_agent.process_query(image_path, question)
-            
-            # Add metadata
-            result.update({
-                "sample_id": sample_id,
-                "question": question,
-                "question_idx": question_idx,
-                "patient_id": sample.get("PatientID", ""),
-                "study_date": sample.get("StudyDate", ""),
-                "findings": sample.get("Findings", ""),
-                "impression": sample.get("Impression", ""),
-                "processed_at": datetime.now().isoformat()
-            })
-            
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error processing sample {sample_id} with question {question_idx}: {e}")
+        # Get valid image path
+        image_path = self._get_valid_image_path(sample)
+        if not image_path:
             return {
-                "error": str(e),
+                "error": "No valid image path found",
                 "sample_id": sample_id,
                 "question": question,
                 "question_idx": question_idx
             }
+        
+        # Process the query using XrayAgent
+        logger.info(f"Processing sample {sample_id} with question {question_idx + 1}")
+        result = self.xray_agent.process_query(image_path, question, study_id=sample_id, question_id=str(question_idx + 1))
+        
+        # Add metadata
+        result.update({
+            "sample_id": sample_id,
+            "question": question,
+            "question_idx": question_idx,
+            "patient_id": sample.get("PatientID", ""),
+            "study_date": sample.get("StudyDate", ""),
+            "findings": sample.get("Findings", ""),
+            "impression": sample.get("Impression", ""),
+            "processed_at": datetime.now().isoformat()
+        })
+        
+        return result
     
     def process_all_samples(self, max_samples: Optional[int] = None, start_from: int = 0) -> Dict[str, Any]:
         """
-        Process all samples with all questions and return structured results
+        Process all samples with all questions, one at a time, and save immediately
         
         Args:
             max_samples: Maximum number of samples to process (None for all)
@@ -165,9 +170,10 @@ class XrayBatchProcessor:
         Returns:
             Dictionary with sample IDs as keys and their question results
         """
-        structured_results = {}
+        # Load existing results to continue from where we left off
+        structured_results = self.load_existing_results()
+        
         sample_items = list(self.samples.items())
-        sample_items = sample_items[:1]
         
         # Apply limits
         if start_from > 0:
@@ -175,20 +181,25 @@ class XrayBatchProcessor:
         if max_samples:
             sample_items = sample_items[:max_samples]
         
-        total_tasks = len(sample_items) * len(self.questions)
-        current_task = 0
+        # Filter out already processed samples
+        remaining_samples = [(sid, s) for sid, s in sample_items if sid not in structured_results]
         
-        logger.info(f"Processing {len(sample_items)} samples with {len(self.questions)} questions each")
-        logger.info(f"Total tasks: {total_tasks}")
+        total_samples = len(sample_items)
+        already_processed = len(sample_items) - len(remaining_samples)
         
-        for sample_idx, (sample_id, sample) in enumerate(sample_items):
-            logger.info(f"Processing sample {sample_idx + 1}/{len(sample_items)}: {sample_id}")
+        logger.info(f"Total samples to consider: {total_samples}")
+        logger.info(f"Already processed: {already_processed}")
+        logger.info(f"Remaining to process: {len(remaining_samples)}")
+        logger.info(f"Questions per sample: {len(self.questions)}")
+        
+        for sample_idx, (sample_id, sample) in enumerate(remaining_samples):
+            logger.info(f"Processing sample {sample_idx + 1}/{len(remaining_samples)}: {sample_id}")
             
             # Initialize sample results structure
             sample_results = {}
             
             for question_idx, question in enumerate(self.questions):
-                current_task += 1
+                logger.info(f"  Question {question_idx + 1}/{len(self.questions)}: {question[:50]}...")
                 
                 # Process single sample-question combination
                 result = self.process_sample_with_question(
@@ -199,58 +210,77 @@ class XrayBatchProcessor:
                 question_key = f"question{question_idx + 1}"
                 sample_results[question_key] = result
                 
-                # Log progress
-                if current_task % 10 == 0:
-                    logger.info(f"Completed {current_task}/{total_tasks} tasks ({current_task/total_tasks*100:.1f}%)")
-                
                 # Optional: Add small delay to avoid overwhelming the API
                 time.sleep(0.1)
             
-            # Add all results for this sample
+            # Save this sample immediately
+            self.save_single_sample(sample_id, sample_results)
+            
+            # Add to overall results
             structured_results[sample_id] = sample_results
             
-            # Save intermediate results every 10 samples
-            if (sample_idx + 1) % 10 == 0:
-                self._save_intermediate_results(structured_results, sample_idx + 1)
+            logger.info(f"✅ Completed sample {sample_idx + 1}/{len(remaining_samples)}: {sample_id}")
         
-        logger.info(f"Completed processing all {len(sample_items)} samples")
+        logger.info(f"Completed processing. Total samples in results: {len(structured_results)}")
         return structured_results
     
-    def _save_intermediate_results(self, results: Dict[str, Any], sample_count: int):
-        """Save intermediate results to avoid data loss"""
-        filename = f"intermediate_results_{sample_count}_samples.json"
-        filepath = self.data_dir / filename
-        
-        try:
-            with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(results, f, indent=2, ensure_ascii=False)
-            logger.info(f"Saved intermediate results to {filepath}")
-        except Exception as e:
-            logger.error(f"Error saving intermediate results: {e}")
     
     def save_results(self, results: Dict[str, Any], filename: Optional[str] = None):
         """Save results to JSON file"""
         if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"xray_analysis_results_{timestamp}.json"
+            filename = "xray_analysis_results.json"
         
-        filepath = self.data_dir / filename
+        output_dir = Path("/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        filepath = output_dir / filename
         
-        try:
-            with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(results, f, indent=2, ensure_ascii=False)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=2, ensure_ascii=False, default=json_serializer)
+        
+        logger.info(f"Results saved to {filepath}")
+        
+        # Count total results
+        total_results = sum(len(sample_results) for sample_results in results.values())
+        logger.info(f"Total results: {total_results}")
+        
+        # Create summary statistics
+        self._create_summary_stats(results, filepath.with_suffix('.summary.json'))
+    
+    def save_single_sample(self, sample_id: str, sample_results: Dict[str, Any]):
+        """Save results for a single sample"""
+        filename = f"sample_{sample_id}.json"
+        output_dir = Path("/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        filepath = output_dir / filename
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(sample_results, f, indent=2, ensure_ascii=False, default=json_serializer)
+        
+        logger.info(f"Sample {sample_id} results saved to {filepath}")
+    
+    def load_existing_results(self) -> Dict[str, Any]:
+        """Load existing results to continue processing"""
+        output_dir = Path("/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output")
+        results = {}
+        
+        # Look for existing sample files
+        for sample_file in output_dir.glob("sample_*.json"):
+            try:
+                sample_id = sample_file.stem.replace("sample_", "")
+                with open(sample_file, 'r', encoding='utf-8') as f:
+                    sample_data = json.load(f)
+                results[sample_id] = sample_data
+                logger.info(f"Loaded existing results for sample: {sample_id}")
+            except Exception as e:
+                logger.warning(f"Error loading {sample_file}: {e}")
+        
+        if results:
+            logger.info(f"Loaded existing results for {len(results)} samples")
+        else:
+            logger.info("No existing results found, starting fresh")
+        
+        return results
             
-            logger.info(f"Results saved to {filepath}")
-            
-            # Count total results
-            total_results = sum(len(sample_results) for sample_results in results.values())
-            logger.info(f"Total results: {total_results}")
-            
-            # Create summary statistics
-            self._create_summary_stats(results, filepath.with_suffix('.summary.json'))
-            
-        except Exception as e:
-            logger.error(f"Error saving results: {e}")
     
     def _create_summary_stats(self, results: Dict[str, Any], summary_filepath: Path):
         """Create summary statistics from results"""
@@ -294,7 +324,7 @@ class XrayBatchProcessor:
             }
             
             with open(summary_filepath, 'w', encoding='utf-8') as f:
-                json.dump(summary, f, indent=2, ensure_ascii=False)
+                json.dump(summary, f, indent=2, ensure_ascii=False, default=json_serializer)
             
             logger.info(f"Summary statistics saved to {summary_filepath}")
             
@@ -303,7 +333,7 @@ class XrayBatchProcessor:
 
 def main():
     """Main function to run the batch processing"""
-    logger.info("Starting X-ray batch processing")
+    logger.info("Starting X-ray batch processing (one sample at a time)")
     
     # Initialize processor
     processor = XrayBatchProcessor()
@@ -317,14 +347,15 @@ def main():
         logger.error("No samples loaded. Exiting.")
         return
     
-    # Process all samples (you can limit this for testing)
-    # For testing, you might want to use: max_samples=10
-    results = processor.process_all_samples(max_samples=None)  # Process all 500 samples
+    # Process all samples (will automatically continue from where it left off)
+    results = processor.process_all_samples()
     
-    # Save results
-    processor.save_results(results)
+    # Save consolidated results file
+    processor.save_results(results, "xray_analysis_results.json")
     
     logger.info("Batch processing completed successfully")
+    logger.info(f"Individual sample files: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/sample_*.json")
+    logger.info(f"Consolidated results: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/xray_analysis_results.json")
 
 if __name__ == "__main__":
     main() 

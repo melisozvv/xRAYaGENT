@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import logging
 import re
+from datetime import datetime
 
 # Try to import required packages with helpful error messages
 try:
@@ -23,15 +24,24 @@ except ImportError:
     raise ImportError("Matplotlib and NumPy are required. Install with: pip install matplotlib numpy")
 
 try:
+    import cv2
+except ImportError:
+    logger.warning("OpenCV not found. IOU calculation will be disabled. Install with: pip install opencv-python")
+
+try:
     from openai import AzureOpenAI
 except ImportError:
     raise ImportError("OpenAI library is required. Install with: pip install openai>=1.0.0")
 
 # Import tool classes
-from .tools.torchxrayvision_classifier import TorchXrayVisionClassifier
-from .tools.anatomy_segmentation import ChestXrayAnatomySegmentation
-from .tools.ett_detection import ETTDetection
-from .tools.maira_2 import MAIRA2Detection
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.'))
+
+from tools.covid19 import COVID19Detection
+from tools.torchxrayvision_classifier import TorchXrayVisionClassifier
+from tools.anatomy_segmentation import ChestXrayAnatomySegmentation
+from tools.ett_detection import ETTDetection
+from tools.maira_2 import MAIRA2Detection
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -75,28 +85,150 @@ class FunctionExecutor:
             "TorchXrayVision": TorchXrayVisionClassifier(),
             "ChestXRayAnatomySegmentation": ChestXrayAnatomySegmentation(),
             "FactCheXcker CarinaNet": ETTDetection(),
-            "MAIRA-2": MAIRA2Detection()
+            "MAIRA-2": MAIRA2Detection(),
+            "COVID19Detection": COVID19Detection()
         }
+        self.execution_log = []  # 记录每次执行的详细信息
     
     def execute_function(self, function_call: FunctionCall) -> Dict[str, Any]:
-        """Execute a function call"""
+        """Execute a function call and log detailed results"""
+        execution_start = datetime.now()
+        
+        # 创建执行记录
+        execution_record = {
+            "timestamp": execution_start.isoformat(),
+            "tool_name": function_call.tool_name,
+            "function_name": function_call.function_name,
+            "parameters": function_call.parameters.copy(),
+            "status": "started"
+        }
+        
         try:
             tool = self.tools.get(function_call.tool_name)
             if not tool:
-                return {"error": f"Tool {function_call.tool_name} not found"}
+                error_result = {"error": f"Tool {function_call.tool_name} not found"}
+                execution_record.update({
+                    "status": "error",
+                    "error": error_result["error"],
+                    "execution_time_ms": 0,
+                    "result": error_result
+                })
+                self.execution_log.append(execution_record)
+                return error_result
             
             # Get the function from the tool
             function = getattr(tool, function_call.function_name, None)
             if not function:
-                return {"error": f"Function {function_call.function_name} not found in {function_call.tool_name}"}
+                error_result = {"error": f"Function {function_call.function_name} not found in {function_call.tool_name}"}
+                execution_record.update({
+                    "status": "error", 
+                    "error": error_result["error"],
+                    "execution_time_ms": 0,
+                    "result": error_result
+                })
+                self.execution_log.append(execution_record)
+                return error_result
+            
+            # 记录执行开始
+            logger.info(f"🚀 执行模型: {function_call.tool_name}.{function_call.function_name}")
+            logger.info(f"📝 参数: {function_call.parameters}")
             
             # Call the function with parameters
             result = function(**function_call.parameters)
+            
+            # 计算执行时间
+            execution_end = datetime.now()
+            execution_time = (execution_end - execution_start).total_seconds() * 1000
+            
+            # 记录成功执行
+            execution_record.update({
+                "status": "completed",
+                "execution_time_ms": round(execution_time, 2),
+                "result": result,
+                "completed_at": execution_end.isoformat()
+            })
+            
+            # 记录结果摘要
+            result_summary = self._create_result_summary(result)
+            execution_record["result_summary"] = result_summary
+            
+            logger.info(f"✅ Model Run Completed: {function_call.tool_name}.{function_call.function_name}")
+            logger.info(f"⏱️ Time: {execution_time:.2f}ms")
+            logger.info(f"📊 Summary: {result_summary}")
+            
+            # 保存详细结果到日志
+            self.execution_log.append(execution_record)
+            
             return result
             
         except Exception as e:
-            logger.error(f"Error executing function: {e}")
-            return {"error": str(e)}
+            execution_end = datetime.now()
+            execution_time = (execution_end - execution_start).total_seconds() * 1000
+            
+            error_msg = str(e)
+            execution_record.update({
+                "status": "error",
+                "error": error_msg,
+                "execution_time_ms": round(execution_time, 2),
+                "result": {"error": error_msg},
+                "completed_at": execution_end.isoformat()
+            })
+            
+            logger.error(f"❌ 模型执行失败: {function_call.tool_name}.{function_call.function_name}")
+            logger.error(f"💥 错误: {error_msg}")
+            
+            self.execution_log.append(execution_record)
+            return {"error": error_msg}
+    
+    def _create_result_summary(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """创建结果摘要用于记录"""
+        summary = {}
+        
+        if "error" in result:
+            summary["has_error"] = True
+            summary["error"] = result["error"]
+            return summary
+        
+        summary["has_error"] = False
+        
+        # 统计结果中的关键信息
+        if "predicted_class" in result:
+            summary["predicted_class"] = result["predicted_class"]
+        if "confidence" in result:
+            summary["confidence"] = result["confidence"]
+        if "covid_probability" in result:
+            summary["covid_probability"] = result["covid_probability"]
+        if "risk_level" in result:
+            summary["risk_level"] = result["risk_level"]
+        if "grounding_result" in result:
+            summary["has_grounding"] = True
+        if "coordinates" in result:
+            summary["has_coordinates"] = True
+        if "segmentation_completed" in result:
+            summary["segmentation_completed"] = result["segmentation_completed"]
+        
+        # 统计输出文件数量
+        if "output_masks" in result:
+            summary["mask_count"] = len(result["output_masks"])
+        
+        return summary
+    
+    def get_execution_log(self) -> List[Dict[str, Any]]:
+        """获取执行日志"""
+        return self.execution_log.copy()
+    
+    def clear_execution_log(self):
+        """清空执行日志"""
+        self.execution_log.clear()
+    
+    def save_execution_log(self, filepath: str):
+        """保存执行日志到文件"""
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(self.execution_log, f, indent=2, ensure_ascii=False, default=str)
+            logger.info(f"📁 执行日志已保存到: {filepath}")
+        except Exception as e:
+            logger.error(f"❌ 保存执行日志失败: {e}")
 
 class XrayAgent:
     """
@@ -134,7 +266,7 @@ class XrayAgent:
                     "parameters": ["image_path", "return_masks"]
                 },
                 "segment_anatomy_structured": {
-                    "description": "Segment anatomical structures with structured output directory (../output/study_id/question_id/imasks)",
+                    "description": "Segment anatomical structures with structured output directory (/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/study_id/q{question_id}/imasks)",
                     "parameters": ["image_path", "study_id", "question_id", "return_masks"]
                 },
                 "process_folder": {
@@ -177,6 +309,24 @@ class XrayAgent:
                     "description": "Ground anatomical structures in chest X-ray",
                     "parameters": ["image_path"]
                 }
+            },
+            "COVID19Detection": {
+                "detect_covid19": {
+                    "description": "Detect COVID-19 in chest X-ray image using BEiT vision transformer",
+                    "parameters": ["image_path", "return_probabilities"]
+                },
+                "analyze_covid_risk": {
+                    "description": "Analyze COVID-19 risk with detailed interpretation and risk levels",
+                    "parameters": ["image_path"]
+                },
+                "batch_detect": {
+                    "description": "Detect COVID-19 in multiple chest X-ray images",
+                    "parameters": ["image_paths", "return_probabilities"]
+                },
+                "get_model_info": {
+                    "description": "Get information about the COVID-19 detection model",
+                    "parameters": []
+                }
             }
         }
         return functions
@@ -204,7 +354,7 @@ class XrayAgent:
         """
         try:
             # Create output directory
-            output_dir = Path(f"../output/{study_id}/{question_id}")
+            output_dir = Path(f"/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/{study_id}/q{question_id}")
             output_dir.mkdir(parents=True, exist_ok=True)
             
             # Load image
@@ -376,7 +526,7 @@ class XrayAgent:
     
     Structured Output Guidelines:
     - For anatomy segmentation, prefer "segment_anatomy_structured" over "segment_anatomy" 
-    - This saves masks to organized directories: ../output/study_id/question_id/imasks
+    - This saves masks to organized directories: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/study_id/q{question_id}/imasks
     - Always include study_id and question_id parameters for structured methods
     """
 
@@ -465,6 +615,137 @@ The response should be in JSON format with the structure specified above.
                 "expected_output": "Fallback VQA response"
             }
 
+
+    def _calculate_bbox_mask_iou(self, bbox: List[float], mask_path: str, original_image_size: tuple = None) -> float:
+        """
+        Calculate Intersection over Union (IOU) between bounding box and anatomy mask
+        
+        Args:
+            bbox: Bounding box coordinates [x1, y1, x2, y2]
+            mask_path: Path to the mask image file
+            original_image_size: (width, height) of original image if bbox needs scaling
+            
+        Returns:
+            IOU score between 0 and 1
+        """
+        try:
+            import cv2
+            
+            if not os.path.exists(mask_path):
+                logger.warning(f"Mask file not found: {mask_path}")
+                return 0.0
+            
+            # Load mask
+            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+            if mask is None:
+                logger.warning(f"Could not load mask: {mask_path}")
+                return 0.0
+            
+            h, w = mask.shape
+            
+            # Create bounding box mask
+            x1, y1, x2, y2 = bbox
+            
+            # Scale coordinates to mask size if original image size is provided
+            if original_image_size:
+                orig_w, orig_h = original_image_size
+                x1 = int(x1 * w / orig_w)
+                y1 = int(y1 * h / orig_h)
+                x2 = int(x2 * w / orig_w)
+                y2 = int(y2 * h / orig_h)
+            else:
+                # Assume coordinates are already in mask coordinates
+                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+            
+            # Ensure coordinates are within bounds
+            x1 = max(0, min(x1, w))
+            y1 = max(0, min(y1, h))
+            x2 = max(0, min(x2, w))
+            y2 = max(0, min(y2, h))
+            
+            # Create bbox mask
+            bbox_mask = np.zeros((h, w), dtype=np.uint8)
+            bbox_mask[y1:y2, x1:x2] = 255
+            
+            # Binarize anatomy mask
+            _, binary_mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+            
+            # Calculate intersection and union
+            intersection = cv2.bitwise_and(bbox_mask, binary_mask)
+            union = cv2.bitwise_or(bbox_mask, binary_mask)
+            
+            intersection_area = np.sum(intersection > 0)
+            union_area = np.sum(union > 0)
+            
+            if union_area == 0:
+                return 0.0
+            
+            iou = intersection_area / union_area
+            return float(iou)
+            
+        except Exception as e:
+            logger.error(f"Error calculating IOU: {e}")
+            return 0.0
+
+    def _determine_location_from_masks(self, bbox: List[float], study_id: str, question_id: str, 
+                                     original_image_size: tuple = None) -> Optional[str]:
+        """
+        Determine anatomical location by calculating IOU with anatomy masks
+        
+        Args:
+            bbox: Bounding box coordinates [x1, y1, x2, y2]
+            study_id: Study ID for finding mask directory
+            question_id: Question ID for finding mask directory
+            original_image_size: (width, height) of original image
+            
+        Returns:
+            Location string or None if no good match found
+        """
+        try:
+            # Define mask file mappings
+            mask_mappings = {
+                "left lung.png": "left lung",
+                "right lung.png": "right lung", 
+                "lung upper lobe left.png": "lung upper lobe left",
+                "lung upper lobe right.png": "lung upper lobe right",
+                "lung lower lobe left.png": "lung lower lobe left",
+                "lung lower lobe right.png": "lung lower lobe right"
+            }
+            
+            base_output_dir = "/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output"
+            mask_dir = f"{base_output_dir}/{study_id}/q{question_id}/imasks"
+            
+            if not os.path.exists(mask_dir):
+                logger.warning(f"Mask directory not found: {mask_dir}")
+                return None
+            
+            best_iou = 0.0
+            best_location = None
+            
+            # Check each possible mask file
+            for mask_file, location in mask_mappings.items():
+                mask_path = os.path.join(mask_dir, mask_file)
+                
+                if os.path.exists(mask_path):
+                    iou = self._calculate_bbox_mask_iou(bbox, mask_path, original_image_size)
+                    logger.info(f"IOU for {location}: {iou:.3f}")
+                    
+                    if iou > best_iou:
+                        best_iou = iou
+                        best_location = location
+            
+            # Only return location if IOU is above threshold
+            if best_iou > 0.1:  # 10% overlap threshold
+                logger.info(f"Best location match: {best_location} (IOU: {best_iou:.3f})")
+                return best_location
+            else:
+                logger.info(f"No good location match found (best IOU: {best_iou:.3f})")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error determining location from masks: {e}")
+            return None
+
     def synthesize_results(self, query: str, image_path: str, analysis: Dict[str, Any], results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Use GPT-4.1 to synthesize function results into a structured answer
@@ -488,35 +769,36 @@ The response should be in JSON format with the structure specified above.
                     "function": f"{func_call['tool_name']}.{func_call['function_name']}",
                     "error": result["error"]
                 })
+   
         
-        system_prompt = """You are an expert radiologist providing clear, concise answers to medical questions about X-ray images. Your task is to synthesize the results from multiple medical imaging tools into a single, coherent answer.
+
+            # Use the specific JSON format required by the question
+            system_prompt = f"""You are an expert radiologist providing clear, concise answers to medical questions about X-ray images. Your task is to synthesize the results from multiple medical imaging tools into a single, coherent answer.
+
+CRITICAL INSTRUCTION: The user has specified a required JSON response format. You MUST follow this exact format:
 
 Guidelines:
-1. Answer the user's original question directly and clearly
+1. Answer the user's original question directly using the EXACT JSON format specified
 2. Use the tool results to support your answer
-3. Provide a structured response with key findings
+3. Fill in the required fields with appropriate medical findings
 4. Use medical terminology appropriately but ensure clarity
-5. If results are conflicting, acknowledge the discrepancy
+5. If results are conflicting, choose the most reliable findings
 6. Only include information relevant to answering the question
+7. STRICTLY follow the specified JSON structure - do not add extra fields or change the format
 
-Response Format:
-Return a JSON object with:
-- "answer": Direct answer to the user's question (2-3 sentences)
-- "key_findings": List of main findings relevant to the question
-- "confidence": Overall confidence level (High/Moderate/Low)
-- "recommendations": Any relevant clinical recommendations (if applicable)
-- "technical_notes": Brief technical details if relevant to the answer"""
+IMPORTANT: Your response must be ONLY the JSON object in the specified format, nothing else."""
+       
 
         user_prompt = f"""
-Original Question: "{query}"
+        Original Question: "{query}"
 
-Analysis Reasoning: {analysis.get('reasoning', 'No reasoning provided')}
+        Analysis Reasoning: {analysis.get('reasoning', 'No reasoning provided')}
 
-Tool Results:
-{json.dumps(results_summary, indent=2, default=str)}
+        Tool Results:
+        {json.dumps(results_summary, indent=2, default=str)}
 
-Please provide a structured answer to the original question based on these tool results and your analysis of the X-ray image.
-"""
+        Please provide a structured answer to the original question based on these tool results and your analysis of the X-ray image.
+        """
 
         try:
             response = self.client.chat.completions.create(
@@ -607,6 +889,12 @@ Please provide a structured answer to the original question based on these tool 
         
         structured_answer = self.synthesize_results(query, image_path, analysis, function_results)
         
+        # Check if segment_anatomy_structured was used
+        has_anatomy_segmentation = any(
+            fc["function_name"] == "segment_anatomy_structured" 
+            for fc in function_selection.get("function_calls", [])
+        )
+        
         # Check if bounding box plotting is needed
         bbox_image_path = ""
         if self.check_requires_bounding_box(query):
@@ -622,6 +910,27 @@ Please provide a structured answer to the original question based on these tool 
                     except:
                         confidence = None
                 
+                # If anatomy segmentation was used and we have bounding box, determine location via IOU
+                if has_anatomy_segmentation:
+                    # Get original image size for coordinate scaling
+                    try:
+                        from PIL import Image
+                        with Image.open(image_path) as img:
+                            original_image_size = img.size  # (width, height)
+                    except:
+                        original_image_size = None
+                    
+                    # Determine location from masks
+                    location = self._determine_location_from_masks(
+                        bbox_coords, study_id, question_id, original_image_size
+                    )
+                    
+                    if location:
+                        # Add LOCATION to structured answer if required JSON format exists
+                        if "LOCATION" in structured_answer.upper():
+                            structured_answer["LOCATION"] = location
+                            logger.info(f"Added LOCATION to response: {location}")
+                
                 # Plot bounding box
                 bbox_image_path = self.plot_bounding_box(
                     image_path=image_path,
@@ -632,6 +941,21 @@ Please provide a structured answer to the original question based on these tool 
                     confidence=confidence
                 )
         
+        # 获取详细执行记录
+        execution_log = self.function_executor.get_execution_log()
+        
+        # 保存模型执行日志到文件
+        if execution_log:
+            log_filename = f"model_execution_log_{study_id}_{question_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            base_output_dir = "/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output"
+            log_filepath = f"{base_output_dir}/{study_id}/q{question_id}/{log_filename}"
+            
+            # 确保目录存在
+            os.makedirs(f"{base_output_dir}/{study_id}/q{question_id}", exist_ok=True)
+            
+            # 保存详细日志
+            self.function_executor.save_execution_log(log_filepath)
+        
         # Prepare comprehensive response
         response = {
             "query": query,
@@ -641,10 +965,37 @@ Please provide a structured answer to the original question based on these tool 
             "analysis": analysis,
             "results": structured_answer,
             "summary": structured_answer.get("answer", "No answer generated"),
-            "bbox_image_path": bbox_image_path
+            "bbox_image_path": bbox_image_path,
+            "model_execution_log": execution_log,  # 包含详细的模型执行记录
+            "execution_summary": self._create_execution_summary(execution_log)  # 执行摘要
         }
         
+        # 清空执行日志，为下次查询做准备
+        self.function_executor.clear_execution_log()
+        
         return response
+    
+    def _create_execution_summary(self, execution_log: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """创建执行摘要"""
+        if not execution_log:
+            return {"total_models": 0, "successful": 0, "failed": 0, "total_time_ms": 0}
+        
+        total_models = len(execution_log)
+        successful = sum(1 for log in execution_log if log.get("status") == "completed")
+        failed = sum(1 for log in execution_log if log.get("status") == "error")
+        total_time = sum(log.get("execution_time_ms", 0) for log in execution_log)
+        
+        # 统计使用的模型
+        models_used = list(set(f"{log['tool_name']}.{log['function_name']}" for log in execution_log))
+        
+        return {
+            "total_models": total_models,
+            "successful": successful,
+            "failed": failed,
+            "total_time_ms": round(total_time, 2),
+            "models_used": models_used,
+            "average_time_ms": round(total_time / total_models, 2) if total_models > 0 else 0
+        }
 
     def list_available_functions(self) -> Dict[str, Any]:
         """Return information about all available functions"""
@@ -699,7 +1050,7 @@ if __name__ == "__main__":
     
     print("\n" + "=" * 60)
     print("Processing complete!")
-    print("Check ../output/ directory for:")
-    print("- Bounding box images: ../output/study_id/question_id/img_with_bbox.png")
-    print("- Anatomy masks: ../output/study_id/question_id/imasks/")
+    print("Check /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/ directory for:")
+    print("- Bounding box images: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/study_id/q{question_id}/img_with_bbox.png")
+    print("- Anatomy masks: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/study_id/q{question_id}/imasks/")
     print("=" * 60) 

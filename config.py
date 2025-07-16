@@ -46,6 +46,7 @@ PREFERRED_CLASSIFICATION_MODEL = "TorchXrayVision"
 PREFERRED_SEGMENTATION_MODEL = "ChestXRayAnatomySegmentation"
 PREFERRED_DETECTION_MODEL = "FactCheXcker CarinaNet"
 PREFERRED_GROUNDING_MODEL = "MAIRA-2"
+PREFERRED_COVID_MODEL = "COVID19Detection"
 
 # Tool Selection Keywords
 # ======================
@@ -54,7 +55,8 @@ TOOL_SELECTION_KEYWORDS = {
     "classification": ["pathology", "disease", "condition", "abnormal", "detect"],
     "segmentation": ["segment", "structure", "anatomy", "outline", "boundary"],
     "detection": ["detect", "find", "locate", "position", "placement"],
-    "measurement": ["measure", "size", "ratio", "distance", "calculate"]
+    "measurement": ["measure", "size", "ratio", "distance", "calculate"],
+    "covid19": ["covid", "covid-19", "coronavirus", "sars-cov-2", "pandemic", "viral pneumonia"]
 }
 
 # Output Settings

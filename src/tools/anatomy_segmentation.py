@@ -221,8 +221,9 @@ class ChestXrayAnatomySegmentation:
             if not self.check_cxas_availability():
                 return {"error": "cxas_segment command not found. Please install ChestXRayAnatomySegmentation package."}
             
-            # Create structured output directory
-            output_dir = f"../output/{study_id}/{question_id}/imasks"
+            # Create structured output directory with absolute path
+            base_output_dir = "/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output"
+            output_dir = f"{base_output_dir}/{study_id}/q{question_id}/imasks"
             os.makedirs(output_dir, exist_ok=True)
             self.output_dir = output_dir
             
@@ -524,7 +525,7 @@ def test_anatomy_segmentation():
     
     # Test segmentation
     print(f"🔄 Running cxas_segment on {image_path}...")
-    output_dir = os.path.join(os.path.dirname(image_path), "output")
+    output_dir = os.path.join(os.path.dirname(image_path), "seg_output")
     result = segmenter.segment_anatomy(image_path, output_dir=output_dir, output_type="png", device="cpu")
     
     if "error" in result:
