@@ -1,11 +1,11 @@
-Does this X-ray have tuberculosis?
-Does it have the ET Tube? What's the distance between the Carina and the ET Tube?
-Is there nodules in this X-ray? Where is the nodule?
-Is this X-ray contain any fractures?
-Is the Mediastinum normal?
-What disease can you find in the left lung? Right lung?
-Is the distance between the carina and the ET tube 5.6 mm?
-Can you locate the Pleural effusion? 
-Is there pneumonia? Can you locate the Pneumonia?
-500 50 
-
+"Does this X-ray have tuberculosis? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""left lung"" or ""right lung"" or ""lung upper lobe left"" or ""lung upper lobe right"" or ""lung lower lobe left"" or ""lung lower lobe right""}"
+"Does it have the ET Tube and what is the distance between the Carina and the ET Tube? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""DISTANCE"": FLOAT}"
+"Is there nodules in this X-ray and if so where is the nodule? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""left lung"" or ""right lung"" or ""lung upper lobe left"" or ""lung upper lobe right"" or ""lung lower lobe left"" or ""lung lower lobe right"" or ""lung middle lobe right""}"
+"Is there any evidence of COVID-19? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""left lung"" or ""right lung"" or ""lung upper lobe left"" or ""lung upper lobe right"" or ""lung lower lobe left"" or ""lung lower lobe right"" or ""lung middle lobe right""}"
+"Is the Mediastinum normal? RESPONSE IN JSON WITH {""NORMAL"": 0 or 1}"
+"What disease can you find in the left lung? RESPONSE IN JSON WITH {""DISEASES"": [""list of diseases"" (choose from: Atelectasis, Consolidation, Infiltration, Pneumothorax, Edema, Emphysema, Fibrosis, Effusion, Pneumonia, Pleural_Thickening, Cardiomegaly, Nodule, Mass, Hernia, Lung Lesion, Fracture, Lung Opacity, Enlarged Cardiomediastinum)]}"
+"What disease can you find in the right lung? RESPONSE IN JSON WITH {""DISEASES"": [""list of diseases"" (choose from: Atelectasis, Consolidation, Infiltration, Pneumothorax, Edema, Emphysema, Fibrosis, Effusion, Pneumonia, Pleural_Thickening, Cardiomegaly, Nodule, Mass, Hernia, Lung Lesion, Fracture, Lung Opacity, Enlarged Cardiomediastinum)]}"
+"Is there any evidence of pneumothorax? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""left lung"" or ""right lung"" or ""lung upper lobe left"" or ""lung upper lobe right"" or ""lung lower lobe left"" or ""lung lower lobe right"" or ""lung middle lobe right""}"
+"Can you locate the Pleural effusion? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""left lung base"" or ""right lung base"" or ""lung base"" or ""left hemidiaphragm"" or ""right hemidiaphragm"" or ""diaphragm""}"
+"Is there pneumonia and can you locate the Pneumonia? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""left lung"" or ""right lung"" or ""lung upper lobe left"" or ""lung upper lobe right"" or ""lung lower lobe left"" or ""lung lower lobe right"" or ""lung middle lobe right""}"
+"Is there evidence of hilar lymphadenopathy? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""cardiomediastinum"" or ""middle mediastinum"" or ""upper mediastinum"" or ""pulmonary artery""}"

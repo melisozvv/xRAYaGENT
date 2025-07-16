@@ -195,6 +195,86 @@ class ChestXrayAnatomySegmentation:
         except Exception as e:
             logger.error(f"Error parsing segmentation output: {e}")
             return {"structures": {}, "detected_structures": [], "masks": {}}
+
+    def segment_anatomy_structured(self, image_path: str, study_id: str, question_id: str, 
+                                 return_masks: bool = True, output_type: str = "png", 
+                                 device: str = "cpu") -> Dict[str, Any]:
+        """
+        Segment anatomical structures with structured output directory
+        
+        Args:
+            image_path: Path to the X-ray image
+            study_id: Study ID for organizing output
+            question_id: Question ID for organizing output
+            return_masks: Whether to generate and save mask images
+            output_type: Output format (png, nii, etc.)
+            device: Device to run on (cpu, gpu, cuda, 0, 1, etc.)
+            
+        Returns:
+            Dictionary with segmentation results and structured output paths
+        """
+        try:
+            if not os.path.exists(image_path):
+                return {"error": f"Image not found: {image_path}"}
+            
+            # Check if cxas_segment is available
+            if not self.check_cxas_availability():
+                return {"error": "cxas_segment command not found. Please install ChestXRayAnatomySegmentation package."}
+            
+            # Create structured output directory
+            output_dir = f"../output/{study_id}/{question_id}/imasks"
+            os.makedirs(output_dir, exist_ok=True)
+            self.output_dir = output_dir
+            
+            # Prepare command
+            cmd = [
+                "cxas_segment",
+                "-i", image_path,
+                "-o", output_dir,
+                "-ot", output_type,
+                "-g", str(device)
+            ]
+            
+            logger.info(f"Running structured anatomy segmentation: {' '.join(cmd)}")
+            
+            # Run the segmentation command
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            
+            if result.returncode != 0:
+                error_msg = f"cxas_segment failed with return code {result.returncode}"
+                if result.stderr:
+                    error_msg += f"\nError: {result.stderr}"
+                return {"error": error_msg}
+            
+            # Parse results
+            segmentation_results = self._parse_segmentation_output(image_path, output_dir)
+            
+            response = {
+                "anatomical_structures": segmentation_results.get("structures", {}),
+                "detected_structures": segmentation_results.get("detected_structures", []),
+                "image_path": image_path,
+                "output_directory": output_dir,
+                "study_id": study_id,
+                "question_id": question_id,
+                "structured_output": True,
+                "tool_name": "ChestXRayAnatomySegmentation",
+                "command_output": result.stdout,
+                "total_structures": len(segmentation_results.get("detected_structures", []))
+            }
+            
+            # Add masks info if requested
+            if return_masks:
+                response["masks"] = segmentation_results.get("masks", {})
+                response["mask_directory"] = output_dir
+            
+            logger.info(f"Structured anatomy segmentation completed. Results saved to: {output_dir}")
+            return response
+            
+        except subprocess.TimeoutExpired:
+            return {"error": "cxas_segment command timed out"}
+        except Exception as e:
+            logger.error(f"Error in structured anatomy segmentation: {e}")
+            return {"error": str(e)}
     
     def process_folder(self, folder_path: str, return_masks: bool = True, output_dir: str = None, 
                       output_type: str = "png", device: str = "cpu") -> Dict[str, Any]:

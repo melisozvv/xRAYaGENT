@@ -6,12 +6,21 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from pathlib import Path
 import logging
+import re
 
 # Try to import required packages with helpful error messages
 try:
-    from PIL import Image
+    from PIL import Image, ImageDraw, ImageFont
 except ImportError:
     raise ImportError("PIL (Pillow) is required. Install with: pip install Pillow>=9.0.0")
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    from matplotlib import colors
+    import numpy as np
+except ImportError:
+    raise ImportError("Matplotlib and NumPy are required. Install with: pip install matplotlib numpy")
 
 try:
     from openai import AzureOpenAI
@@ -22,7 +31,6 @@ except ImportError:
 from .tools.torchxrayvision_classifier import TorchXrayVisionClassifier
 from .tools.anatomy_segmentation import ChestXrayAnatomySegmentation
 from .tools.ett_detection import ETTDetection
-from .tools.bone_fracture_detection import BoneFractureDetection
 from .tools.maira_2 import MAIRA2Detection
 
 # Configure logging
@@ -67,7 +75,6 @@ class FunctionExecutor:
             "TorchXrayVision": TorchXrayVisionClassifier(),
             "ChestXRayAnatomySegmentation": ChestXrayAnatomySegmentation(),
             "FactCheXcker CarinaNet": ETTDetection(),
-            "BoneFractureDetection": BoneFractureDetection(),
             "MAIRA-2": MAIRA2Detection()
         }
     
@@ -126,6 +133,10 @@ class XrayAgent:
                     "description": "Segment anatomical structures in chest X-ray",
                     "parameters": ["image_path", "return_masks"]
                 },
+                "segment_anatomy_structured": {
+                    "description": "Segment anatomical structures with structured output directory (../output/study_id/question_id/imasks)",
+                    "parameters": ["image_path", "study_id", "question_id", "return_masks"]
+                },
                 "process_folder": {
                     "description": "Process all images in a folder and generate mask images",
                     "parameters": ["folder_path", "return_masks"]
@@ -146,20 +157,6 @@ class XrayAgent:
                 },
                 "assess_ett_positioning": {
                     "description": "Assess ETT positioning quality",
-                    "parameters": ["image_path"]
-                }
-            },
-            "BoneFractureDetection": {
-                "detect_fractures": {
-                    "description": "Detect bone fractures in X-ray image",
-                    "parameters": ["image_path", "confidence_threshold"]
-                },
-                "assess_fracture_severity": {
-                    "description": "Assess the severity of detected fractures",
-                    "parameters": ["image_path"]
-                },
-                "analyze_bone_health": {
-                    "description": "Analyze overall bone health and density",
                     "parameters": ["image_path"]
                 }
             },
@@ -189,7 +186,161 @@ class XrayAgent:
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
 
-    def select_functions(self, query: str, image_path: str) -> Dict[str, Any]:
+    def plot_bounding_box(self, image_path: str, bounding_box: List[float], study_id: str, question_id: str, 
+                         query: str = "", confidence: float = None) -> str:
+        """
+        Plot bounding box on the original image and save to output directory
+        
+        Args:
+            image_path: Path to the original X-ray image
+            bounding_box: List of [x_topleft, y_topleft, x_bottomright, y_bottomright]
+            study_id: Study ID for organizing output
+            question_id: Question ID for organizing output
+            query: Question text for annotation
+            confidence: Confidence score to display
+            
+        Returns:
+            Path to the saved image with bounding box
+        """
+        try:
+            # Create output directory
+            output_dir = Path(f"../output/{study_id}/{question_id}")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Load image
+            image = Image.open(image_path)
+            
+            # Convert to RGB if needed
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+            
+            # Get image dimensions
+            img_width, img_height = image.size
+            
+            # Parse bounding box coordinates
+            x1, y1, x2, y2 = bounding_box
+            
+            # Ensure coordinates are within image bounds
+            x1 = max(0, min(x1, img_width))
+            y1 = max(0, min(y1, img_height))
+            x2 = max(0, min(x2, img_width))
+            y2 = max(0, min(y2, img_height))
+            
+            # Create matplotlib figure
+            fig, ax = plt.subplots(1, 1, figsize=(12, 12))
+            ax.imshow(image, cmap='gray')
+            
+            # Create bounding box rectangle
+            width = x2 - x1
+            height = y2 - y1
+            rect = patches.Rectangle((x1, y1), width, height, 
+                                   linewidth=3, edgecolor='red', facecolor='none')
+            ax.add_patch(rect)
+            
+            # Add text annotation
+            annotation_text = ""
+            if query:
+                # Truncate long queries
+                truncated_query = query[:50] + "..." if len(query) > 50 else query
+                annotation_text += f"Q: {truncated_query}\n"
+            
+            if confidence is not None:
+                annotation_text += f"Confidence: {confidence:.3f}"
+            
+            if annotation_text:
+                ax.text(x1, y1 - 10, annotation_text, 
+                       bbox=dict(boxstyle="round,pad=0.3", facecolor="yellow", alpha=0.7),
+                       fontsize=10, verticalalignment='top')
+            
+            # Remove axes
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_title(f"Study: {study_id} | Question: {question_id}", fontsize=12)
+            
+            # Save image
+            output_path = output_dir / "img_with_bbox.png"
+            plt.savefig(output_path, bbox_inches='tight', dpi=150, facecolor='white')
+            plt.close()
+            
+            logger.info(f"Bounding box image saved to: {output_path}")
+            return str(output_path)
+            
+        except Exception as e:
+            logger.error(f"Error plotting bounding box: {e}")
+            return ""
+
+    def check_requires_bounding_box(self, query: str) -> bool:
+        """
+        Check if the question requires bounding box output
+        
+        Args:
+            query: The question text
+            
+        Returns:
+            Boolean indicating if bounding box is required
+        """
+        query_lower = query.lower()
+        bbox_keywords = [
+            "bounding_box", "bounding box", "bbox", "locate", "where", 
+            "position", "coordinates", "find", "spot", "region"
+        ]
+        return any(keyword in query_lower for keyword in bbox_keywords)
+
+    def extract_bounding_box_from_result(self, result: Dict[str, Any]) -> Optional[List[float]]:
+        """
+        Extract bounding box coordinates from analysis result
+        
+        Args:
+            result: The analysis result dictionary
+            
+        Returns:
+            List of bounding box coordinates or None if not found
+        """
+        # Check various possible keys for bounding box
+        possible_keys = ["BOUNDING_BOX", "bounding_box", "bbox", "coordinates"]
+        
+        for key in possible_keys:
+            if key in result:
+                bbox = result[key]
+                if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
+                    try:
+                        return [float(coord) for coord in bbox]
+                    except (ValueError, TypeError):
+                        continue
+        
+        return None
+
+    def _post_process_function_calls(self, function_calls: List[Dict[str, Any]], 
+                                   study_id: str, question_id: str) -> List[Dict[str, Any]]:
+        """
+        Post-process function calls to ensure structured methods have required parameters
+        
+        Args:
+            function_calls: List of function call dictionaries
+            study_id: Study ID to inject
+            question_id: Question ID to inject
+            
+        Returns:
+            Updated function calls with injected parameters
+        """
+        structured_methods = ["segment_anatomy_structured"]
+        
+        for func_call in function_calls:
+            if func_call.get("function_name") in structured_methods:
+                # Ensure parameters dict exists
+                if "parameters" not in func_call:
+                    func_call["parameters"] = {}
+                
+                # Inject study_id and question_id if missing
+                if "study_id" not in func_call["parameters"]:
+                    func_call["parameters"]["study_id"] = study_id
+                
+                if "question_id" not in func_call["parameters"]:
+                    func_call["parameters"]["question_id"] = question_id
+        
+        return function_calls
+
+    def select_functions(self, query: str, image_path: str, study_id: str = "default", question_id: str = "q1") -> Dict[str, Any]:
         """
         Use GPT-4.1 to select appropriate functions and parameters for the query
         """
@@ -215,11 +366,18 @@ class XrayAgent:
 
     Parameter Guidelines:
     - image_path: Always use "{image_path}"
+    - study_id: Use "{study_id}" for structured outputs
+    - question_id: Use "{question_id}" for structured outputs
     - question: Use the user's query or modified version for VQA
     - context: Add relevant clinical context if needed
     - threshold: Use 0.5 as default confidence threshold
     - model_type: Use "densenet121-res224-all" as default for TorchXrayVision
     - return_masks: Use false unless specifically requested
+    
+    Structured Output Guidelines:
+    - For anatomy segmentation, prefer "segment_anatomy_structured" over "segment_anatomy" 
+    - This saves masks to organized directories: ../output/study_id/question_id/imasks
+    - Always include study_id and question_id parameters for structured methods
     """
 
         user_prompt = f"""
@@ -260,12 +418,19 @@ The response should be in JSON format with the structure specified above.
             
             response_text = response.choices[0].message.content
             
-            # Try to extract JSON from response
+            # Extract JSON from response
             try:
                 start_idx = response_text.find('{')
                 end_idx = response_text.rfind('}') + 1
                 json_str = response_text[start_idx:end_idx]
                 analysis = json.loads(json_str)
+                
+                # Post-process function calls to ensure structured methods have required parameters
+                if "function_calls" in analysis:
+                    analysis["function_calls"] = self._post_process_function_calls(
+                        analysis["function_calls"], study_id, question_id
+                    )
+                
             except:
                 # Fallback to VQA
                 analysis = {
@@ -405,7 +570,7 @@ Please provide a structured answer to the original question based on these tool 
                 "technical_notes": str(e)
             }
 
-    def process_query(self, image_path: str, query: str) -> Dict[str, Any]:
+    def process_query(self, image_path: str, query: str, study_id: str = "default", question_id: str = "q1") -> Dict[str, Any]:
         """
         Main method to process a query with an image using predefined functions
         """
@@ -416,7 +581,7 @@ Please provide a structured answer to the original question based on these tool 
             return {"error": f"Image file not found: {image_path}"}
         
         # Select functions using GPT-4.1
-        function_selection = self.select_functions(query, image_path)
+        function_selection = self.select_functions(query, image_path, study_id, question_id)
         
         # Execute selected functions
         function_results = []
@@ -442,13 +607,41 @@ Please provide a structured answer to the original question based on these tool 
         
         structured_answer = self.synthesize_results(query, image_path, analysis, function_results)
         
+        # Check if bounding box plotting is needed
+        bbox_image_path = ""
+        if self.check_requires_bounding_box(query):
+            # Look for bounding box in the synthesized answer
+            bbox_coords = self.extract_bounding_box_from_result(structured_answer)
+            
+            if bbox_coords:
+                # Get confidence if available
+                confidence = structured_answer.get("confidence", None)
+                if isinstance(confidence, str):
+                    try:
+                        confidence = float(confidence.lower().replace("high", "0.9").replace("moderate", "0.7").replace("low", "0.5"))
+                    except:
+                        confidence = None
+                
+                # Plot bounding box
+                bbox_image_path = self.plot_bounding_box(
+                    image_path=image_path,
+                    bounding_box=bbox_coords,
+                    study_id=study_id,
+                    question_id=question_id,
+                    query=query,
+                    confidence=confidence
+                )
+        
         # Prepare comprehensive response
         response = {
             "query": query,
             "image_path": image_path,
+            "study_id": study_id,
+            "question_id": question_id,
             "analysis": analysis,
             "results": structured_answer,
-            "summary": structured_answer.get("answer", "No answer generated")
+            "summary": structured_answer.get("answer", "No answer generated"),
+            "bbox_image_path": bbox_image_path
         }
         
         return response
@@ -463,5 +656,50 @@ if __name__ == "__main__":
     # Initialize the  agent
     agent = XrayAgent()
 
-    result = agent.process_query("../data/xray.jpg", "Is there evidence of ETT in this X-ray? If so, where is it located?")
-    print(json.dumps(result, indent=2, default=str)) 
+    # Example 1: Query with bounding box detection
+    print("=" * 60)
+    print("Example 1: Query with bounding box detection")
+    print("=" * 60)
+    result1 = agent.process_query(
+        image_path="../data/xray.jpg", 
+        query="Where is the heart located in this X-ray?",
+        study_id="study_001",
+        question_id="q1_heart_location"
+    )
+    print(f"Query: {result1['query']}")
+    print(f"Summary: {result1['summary']}")
+    print(f"Bounding box image: {result1['bbox_image_path']}")
+    
+    # Example 2: Anatomy segmentation with structured output
+    print("\n" + "=" * 60)
+    print("Example 2: Anatomy segmentation with structured output")
+    print("=" * 60)
+    result2 = agent.process_query(
+        image_path="../data/xray.jpg", 
+        query="Can you segment the anatomical structures in this chest X-ray?",
+        study_id="study_002", 
+        question_id="q2_anatomy_segmentation"
+    )
+    print(f"Query: {result2['query']}")
+    print(f"Summary: {result2['summary']}")
+    
+    # Example 3: Disease detection
+    print("\n" + "=" * 60)
+    print("Example 3: Disease detection")
+    print("=" * 60)
+    result3 = agent.process_query(
+        image_path="../data/xray.jpg", 
+        query="Is there evidence of pneumonia in this X-ray? If so, where is it located?",
+        study_id="study_003",
+        question_id="q3_pneumonia_detection"
+    )
+    print(f"Query: {result3['query']}")
+    print(f"Summary: {result3['summary']}")
+    print(f"Bounding box image: {result3['bbox_image_path']}")
+    
+    print("\n" + "=" * 60)
+    print("Processing complete!")
+    print("Check ../output/ directory for:")
+    print("- Bounding box images: ../output/study_id/question_id/img_with_bbox.png")
+    print("- Anatomy masks: ../output/study_id/question_id/imasks/")
+    print("=" * 60) 

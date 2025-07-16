@@ -1,18 +1,6 @@
 #!/usr/bin/env python3
 """
-XRAYaGENT Demo Script
-
-This script demonstrates the capabilities of the XRAYaGENT system for medical imaging analysis.
-It processes a sample chest X-ray using multiple AI tools and generates comprehensive reports.
-
-Features:
-- Multi-tool AI analysis
-- Real model inference
-- Comprehensive reporting
-- Tool testing capabilities
-
-Usage:
-    python demo.py
+Demo script for X-ray Agent with bounding box plotting and structured anatomy segmentation
 """
 
 import os
@@ -20,214 +8,142 @@ import sys
 import json
 from pathlib import Path
 
-# Add src directory to path
+# Add the src directory to the path to import XrayAgent
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from xray_agent import XrayAgent
 
 def main():
-    """Main demo function"""
-    print("🔬 Enhanced XrayAgent Demo - Predefined Functions")
-    print("=" * 60)
+    """Demonstrate the enhanced X-ray Agent capabilities"""
     
-    # Initialize the enhanced agent
-    print("Initializing XrayAgent...")
+    print("=" * 80)
+    print("Enhanced X-ray Agent Demo")
+    print("Featuring: Bounding Box Plotting & Structured Anatomy Segmentation")
+    print("=" * 80)
+    
+    # Initialize the agent
     try:
         agent = XrayAgent()
-        print(f"✅ Successfully initialized agent with predefined functions")
-        print()
+        print("✅ X-ray Agent initialized successfully!")
     except Exception as e:
-        print(f"❌ Error initializing agent: {e}")
+        print(f"❌ Failed to initialize X-ray Agent: {e}")
         return
     
-    # Show available functions
-    print("🛠️  Available Functions:")
-    functions = agent.list_available_functions()
-    for tool_name, tool_functions in functions.items():
-        print(f"  📦 {tool_name}:")
-        for func_name, func_info in tool_functions.items():
-            print(f"    • {func_name}: {func_info['description']}")
-    print()
-    
-    # Check for sample image
+    # Test image path
     image_path = "data/xray.jpg"
     if not os.path.exists(image_path):
-        print(f"❌ Sample image not found: {image_path}")
-        print("Please ensure the X-ray image exists in the data directory.")
+        print(f"❌ Test image not found: {image_path}")
+        print("Please ensure you have a test X-ray image at data/xray.jpg")
         return
     
-    # Sample queries to demonstrate different capabilities
-    sample_queries = [
+    print(f"📸 Using test image: {image_path}")
+    print()
+    
+    # Test cases with different functionalities
+    test_cases = [
         {
-            "query": "What pathologies do you see in this chest X-ray?",
-            "description": "VQA for general pathology detection"
+            "name": "Heart Location Detection",
+            "query": "Where is the heart located in this X-ray? Please provide the bounding box coordinates.",
+            "study_id": "demo_study_001",
+            "question_id": "q1_heart_location",
+            "expected_features": ["bounding_box", "location_detection"]
         },
         {
-            "query": "Can you classify the pathologies with confidence scores?",
-            "description": "Pathology classification with scoring"
+            "name": "Anatomical Structure Segmentation",  
+            "query": "Can you segment all the anatomical structures in this chest X-ray?",
+            "study_id": "demo_study_002",
+            "question_id": "q2_anatomy_segmentation", 
+            "expected_features": ["structured_masks", "anatomy_segmentation"]
         },
         {
-            "query": "What is the cardio-thoracic ratio?",
-            "description": "Anatomical measurements"
+            "name": "Lung Disease Detection",
+            "query": "Is there any evidence of pneumonia or other lung disease? If found, where is it located?",
+            "study_id": "demo_study_003",
+            "question_id": "q3_disease_detection",
+            "expected_features": ["disease_detection", "location_analysis"]
         },
         {
-            "query": "Is the endotracheal tube positioned correctly?",
-            "description": "ETT positioning assessment"
-        },
-        {
-            "query": "Are there any bone fractures visible?",
-            "description": "Fracture detection"
+            "name": "ETT Position Analysis",
+            "query": "Is there an endotracheal tube present? If so, where is it positioned?",
+            "study_id": "demo_study_004", 
+            "question_id": "q4_ett_analysis",
+            "expected_features": ["ett_detection", "position_analysis"]
         }
     ]
     
-    print("🔍 Running Demo Queries...")
-    print("=" * 60)
+    results = {}
     
-    for i, query_info in enumerate(sample_queries, 1):
-        query = query_info["query"]
-        description = query_info["description"]
-        
-        print(f"\n📋 Query {i}: {description}")
-        print(f"❓ Question: {query}")
-        print("-" * 40)
+    for i, test_case in enumerate(test_cases, 1):
+        print(f"🔍 Test Case {i}: {test_case['name']}")
+        print(f"   Query: {test_case['query']}")
+        print(f"   Study ID: {test_case['study_id']}")
+        print(f"   Question ID: {test_case['question_id']}")
         
         try:
-            # Run the query
-            result = agent.process_query(image_path, query)
+            # Process the query
+            result = agent.process_query(
+                image_path=image_path,
+                query=test_case['query'],
+                study_id=test_case['study_id'],
+                question_id=test_case['question_id']
+            )
             
-            # Display results
-            print(f"\nQuery: {result['query']}")
-            print(f"Image: {result['image_path']}")
-            print(f"\nAnalysis:")
-            print(f"  Reasoning: {result['analysis']['reasoning']}")
-            print(f"  Selected Functions: {', '.join(result['analysis']['selected_functions'])}")
+            # Store result
+            results[test_case['name']] = result
             
-            print(f"\nResults:")
-            print(f"  Answer: {result['results']['answer']}")
-            print(f"  Key Findings: {', '.join(result['results']['key_findings'])}")
-            print(f"  Confidence: {result['results']['confidence']}")
-            if result['results']['recommendations']:
-                print(f"  Recommendations: {', '.join(result['results']['recommendations'])}")
-            if result['results']['technical_notes']:
-                print(f"  Technical Notes: {result['results']['technical_notes']}")
+            # Display summary
+            print(f"   ✅ Processing completed")
+            print(f"   📝 Summary: {result.get('summary', 'No summary available')[:100]}...")
             
-            # Print summary
-            print(f"\nSummary: {result['summary']}")
+            # Check for bounding box output
+            if result.get('bbox_image_path'):
+                print(f"   📦 Bounding box image: {result['bbox_image_path']}")
             
-            # Save results to file
-            with open('xray_analysis_results.json', 'w') as f:
-                json.dump(result, f, indent=2, default=str)
-            
-            print("\n" + "="*60)
-            print("Analysis complete. Results saved to 'xray_analysis_results.json'")
-            print("="*60)
-            
-            # Demo: Folder processing for anatomy segmentation
-            print("\n🔍 Demonstrating folder processing for anatomy segmentation...")
-            try:
-                # Use the agent to process a folder
-                folder_query = "Process all images in the data folder and generate anatomy masks"
-                folder_result = agent.process_query("data/", folder_query)
+            # Check for structured outputs
+            selected_functions = result.get('analysis', {}).get('selected_functions', [])
+            if 'segment_anatomy_structured' in selected_functions:
+                expected_mask_dir = f"../output/{test_case['study_id']}/{test_case['question_id']}/imasks"
+                print(f"   🎭 Anatomy masks should be in: {expected_mask_dir}")
                 
-                print(f"\nFolder Query: {folder_result['query']}")
-                print(f"Analysis: {folder_result['analysis']['reasoning']}")
-                print(f"Results: {folder_result['results']['answer']}")
-                
-                # Save folder results
-                with open('folder_analysis_results.json', 'w') as f:
-                    json.dump(folder_result, f, indent=2, default=str)
-                
-                print("\n" + "="*60)
-                print("Folder processing complete. Results saved to 'folder_analysis_results.json'")
-                print("="*60)
-                
-            except Exception as e:
-                print(f"⚠️  Folder processing demo failed: {e}")
-            
         except Exception as e:
-            print(f"❌ Error processing query: {e}")
+            print(f"   ❌ Error processing test case: {e}")
+            continue
         
-        print("-" * 60)
+        print()
     
-    print("\n🎯 Demo Complete!")
-    print("\nKey Features Demonstrated:")
-    print("• GPT-4.1 selection of appropriate predefined functions")
-    print("• Structured parameter passing to medical imaging tools")
-    print("• Real tool execution with proper error handling")
-    print("• Comprehensive result analysis and reporting")
-    print("• Modular, testable tool architecture")
-
-def test_individual_tools():
-    """Test individual tool functions"""
-    print("\n🧪 Testing Individual Tool Functions")
-    print("=" * 50)
+    # Summary
+    print("=" * 80)
+    print("DEMO SUMMARY")
+    print("=" * 80)
     
-    # Test each tool individually
-    tool_tests = [
-        ("TorchXrayVision", "torchxrayvision_classifier", "test_torchxrayvision"),
-        ("Anatomy Segmentation", "anatomy_segmentation", "test_anatomy_segmentation"),
-        ("ETT Detection", "ett_detection", "test_ett_detection"),
-        ("Bone Fracture Detection", "bone_fracture_detection", "test_bone_fracture_detection"),
-        ("MAIRA-2 Detection", "maira_2", "test_maira2_detection"),
-    ]
+    successful_tests = len([r for r in results.values() if 'error' not in r])
+    print(f"✅ Successful tests: {successful_tests}/{len(test_cases)}")
     
-    sys.path.append(str(Path(__file__).parent / "src" / "tools"))
+    print("\n📁 Output Directory Structure:")
+    print("../output/")
+    for test_case in test_cases:
+        study_id = test_case['study_id']
+        question_id = test_case['question_id']
+        print(f"├── {study_id}/")
+        print(f"│   └── {question_id}/")
+        print(f"│       ├── img_with_bbox.png  (if bounding box detected)")
+        print(f"│       └── imasks/            (if anatomy segmentation performed)")
     
-    for tool_name, module_name, test_func_name in tool_tests:
-        print(f"\n🔧 Testing {tool_name}...")
-        try:
-            module = __import__(module_name)
-            test_func = getattr(module, test_func_name)
-            success = test_func()
-            if success:
-                print(f"✅ {tool_name} test passed")
-            else:
-                print(f"❌ {tool_name} test failed")
-        except Exception as e:
-            print(f"❌ {tool_name} test error: {e}")
-
-def show_function_selection_example():
-    """Show how GPT-4.1 selects functions for a query"""
-    print("\n🤖 GPT-4.1 Function Selection Example")
-    print("=" * 50)
+    print("\n🔧 New Features Demonstrated:")
+    print("1. ✅ Automatic bounding box plotting for location-based queries")
+    print("2. ✅ Structured anatomy segmentation with organized output directories") 
+    print("3. ✅ Enhanced query processing with study_id and question_id organization")
+    print("4. ✅ Intelligent function selection based on query content")
     
-    agent = XrayAgent()
-    image_path = "data/xray.jpg"
+    print("\n💡 Usage Tips:")
+    print("- Use location-related keywords ('where', 'locate', 'position') for bounding box detection")
+    print("- Anatomy segmentation automatically uses structured output format")
+    print("- All outputs are organized by study_id and question_id for easy management")
+    print("- Bounding boxes are automatically plotted when coordinates are detected")
     
-    if not os.path.exists(image_path):
-        print("❌ Sample image not found")
-        return
-    
-    query = "What pathologies do you see and what is the cardio-thoracic ratio?"
-    
-    print(f"Query: {query}")
-    print("\nFunction Selection Process:")
-    print("-" * 30)
-    
-    try:
-        function_selection = agent.select_functions(query, image_path)
-        
-        print(f"Reasoning: {function_selection.get('reasoning', 'No reasoning provided')}")
-        print(f"Expected Output: {function_selection.get('expected_output', 'No description')}")
-        print("\nSelected Function Calls:")
-        
-        for i, func_call in enumerate(function_selection.get("function_calls", []), 1):
-            print(f"  {i}. {func_call['tool_name']}.{func_call['function_name']}")
-            print(f"     Parameters: {func_call['parameters']}")
-        
-    except Exception as e:
-        print(f"Error in function selection: {e}")
+    print("\n" + "=" * 80)
+    print("Demo completed! Check the ../output/ directory for generated files.")
+    print("=" * 80)
 
 if __name__ == "__main__":
-    # Run main demo
-    main()
-    
-    # Optional individual tool testing
-    test_tools = input("\n🔬 Would you like to test individual tools? (y/n): ")
-    if test_tools.lower() == 'y':
-        test_individual_tools()
-    
-    # Optional function selection example
-    show_selection = input("\n🤖 Would you like to see function selection example? (y/n): ")
-    if show_selection.lower() == 'y':
-        show_function_selection_example() 
+    main() 
