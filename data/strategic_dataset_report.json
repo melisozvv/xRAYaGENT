@@ -1,0 +1,65 @@
+{
+  "dataset_summary": {
+    "total_samples": 500,
+    "creation_date": "2025-01-18",
+    "strategy": "Strategic selection ensuring complete question coverage with positive case optimization",
+    "requirements": {
+      "total_samples": 500,
+      "minimum_positive_per_question": 50,
+      "consolidation_detection": "Question 1 changed from tuberculosis using medical text analysis",
+      "covid19_preservation": "All positive cases maintained"
+    }
+  },
+  "validation_results": {
+    "question1": {
+      "total": 500,
+      "positive": 138,
+      "percentage": 27.6
+    },
+    "question2": {
+      "total": 500,
+      "positive": 63,
+      "percentage": 12.6
+    },
+    "question3": {
+      "total": 500,
+      "positive": 65,
+      "percentage": 13.0
+    },
+    "question4": {
+      "total": 500,
+      "positive": 36,
+      "percentage": 7.2
+    },
+    "question5": {
+      "total": 500,
+      "positive": 36,
+      "percentage": 7.2
+    },
+    "question8": {
+      "total": 500,
+      "positive": 53,
+      "percentage": 10.6
+    },
+    "question9": {
+      "total": 500,
+      "positive": 83,
+      "percentage": 16.6
+    },
+    "question10": {
+      "total": 500,
+      "positive": 108,
+      "percentage": 21.6
+    }
+  },
+  "consolidation_sources": {
+    "medical_text_matches": 138,
+    "total_candidates": 1694,
+    "keywords_used": [
+      "consolidation",
+      "pneumonia",
+      "infiltrate",
+      "infiltration"
+    ]
+  }
+}

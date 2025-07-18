@@ -1,0 +1,9 @@
+Question,Question_Name,Total_Samples,Ground_Truth_Positives,Accuracy,Precision,Recall,F1_Score,True_Positives,False_Positives,True_Negatives,False_Negatives
+Q1,Tuberculosis,489,1,0.881,0.000,0.000,0.000,0,57,431,1
+Q2,ET Tube,500,21,0.050,0.042,1.000,0.081,21,475,4,0
+Q3,Nodules,500,34,0.272,0.073,0.824,0.133,28,358,108,6
+Q4,COVID-19,500,0,0.756,0.000,0.000,0.000,0,122,378,0
+Q8,Pneumothorax,499,5,0.974,0.167,0.400,0.235,2,10,484,3
+Q9,Pleural Effusion,500,50,0.278,0.122,1.000,0.217,50,361,89,0
+Q10,Pneumonia,500,71,0.652,0.275,0.887,0.420,63,166,263,8
+Q11,Hilar Lymphadenopathy,500,3,0.760,0.017,0.667,0.032,2,119,378,1

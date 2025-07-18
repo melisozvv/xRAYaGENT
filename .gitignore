@@ -1,0 +1,51 @@
+# Data directories (large image files)
+data/deid_png/
+data/processed_deid_png/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Log files
+*.log
+
+# Environment files
+.env
+.venv
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Output directories that might contain large files
+output/
+results/
+
+# Temporary files
+tmp/
+temp/ 

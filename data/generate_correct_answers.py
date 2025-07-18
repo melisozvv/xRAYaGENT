@@ -111,6 +111,7 @@ If the information is not mentioned or cannot be reasonably inferred, answer neg
                 
         except Exception as e:
             print(f"Error with GPT analysis: {e}")
+            return self._create_default_response(question)
             
     def _create_default_response(self, question: str) -> Dict[str, Any]:
         """Create a default response when GPT analysis fails"""
@@ -129,10 +130,30 @@ def generate_correct_answers():
             if row and row[0].strip():
                 questions.append(row[0].strip())
     
-    # Load samples
-    samples_file = Path("selected_500_samples.json")
-    with open(samples_file, 'r', encoding='utf-8') as f:
-        samples = json.load(f)
+    # Load original test metadata to get medical findings and impressions
+    original_metadata_file = Path("./test_metadata.json")
+    with open(original_metadata_file, 'r', encoding='utf-8') as f:
+        original_metadata = json.load(f)
+    
+    # Load balanced samples to get the 500 sample IDs and questions
+    balanced_samples_file = Path("./balanced_test_metadata.json")
+    with open(balanced_samples_file, 'r', encoding='utf-8') as f:
+        balanced_sample_list = json.load(f)
+    
+    # Get unique sample IDs from balanced dataset
+    unique_sample_ids = list(set(entry["sample_id"] for entry in balanced_sample_list))
+    
+    # Create samples dictionary with medical data for our 500 samples
+    samples = {}
+    for sample_id in unique_sample_ids:
+        # Find the sample in original metadata
+        if sample_id in original_metadata:
+            sample_data = original_metadata[sample_id]
+            samples[sample_id] = {
+                "Findings": sample_data.get("Findings", ""),
+                "Impression": sample_data.get("Impression", ""),
+                "ImagePath": sample_data.get("ImagePath", [])
+            }
     
     # Initialize analyzer
     analyzer = GPTBasedMedicalAnalyzer()
@@ -198,10 +219,30 @@ def generate_all_correct_answers():
             if row and row[0].strip():
                 questions.append(row[0].strip())
     
-    # Load samples
-    samples_file = Path("selected_500_samples.json")
-    with open(samples_file, 'r', encoding='utf-8') as f:
-        samples = json.load(f)
+    # Load original test metadata to get medical findings and impressions
+    original_metadata_file = Path("./test_metadata.json")
+    with open(original_metadata_file, 'r', encoding='utf-8') as f:
+        original_metadata = json.load(f)
+    
+    # Load balanced samples to get the 500 sample IDs and questions
+    balanced_samples_file = Path("./balanced_test_metadata.json")
+    with open(balanced_samples_file, 'r', encoding='utf-8') as f:
+        balanced_sample_list = json.load(f)
+    
+    # Get unique sample IDs from balanced dataset
+    unique_sample_ids = list(set(entry["sample_id"] for entry in balanced_sample_list))
+    
+    # Create samples dictionary with medical data for our 500 samples
+    samples = {}
+    for sample_id in unique_sample_ids:
+        # Find the sample in original metadata
+        if sample_id in original_metadata:
+            sample_data = original_metadata[sample_id]
+            samples[sample_id] = {
+                "Findings": sample_data.get("Findings", ""),
+                "Impression": sample_data.get("Impression", ""),
+                "ImagePath": sample_data.get("ImagePath", [])
+            }
     
     # Initialize analyzer
     analyzer = GPTBasedMedicalAnalyzer()
@@ -279,7 +320,7 @@ def main():
             print("Operation cancelled.")
             return
         results = generate_all_correct_answers()
-        suffix = "all_500_samples"
+        suffix = "balanced_test"
     else:
         print("Invalid choice. Defaulting to test mode with 10 samples.")
         results = generate_correct_answers()
