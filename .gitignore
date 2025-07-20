@@ -138,6 +138,9 @@ $RECYCLE.BIN/
 *.DCM
 *.nii
 *.nii.gz
+data/processed_deid_png
+data/deid_png
+data/seg_output
 data/test_metadata.csv
 data/*.dicom
 

@@ -19,7 +19,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 # Import the XrayAgent code
-from xray_agent import XrayAgent
+from xray_agent_google import XrayAgent
 
 # Configure logging
 logging.basicConfig(
@@ -48,7 +48,7 @@ def json_serializer(obj):
 class XrayBatchProcessor:
     """Processes multiple X-ray images with multiple questions using XrayAgent"""
     
-    def __init__(self, data_dir: str = "./data", tools_dir: str = "src/tools"):
+    def __init__(self, data_dir: str = "/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/data", tools_dir: str = "src/tools"):
         """
         Initialize the batch processor
         
@@ -68,23 +68,25 @@ class XrayBatchProcessor:
     
     def _load_questions(self) -> List[str]:
         """Load questions from questıons.csv"""
-        questions_file = self.data_dir / "questıons.csv"
-        questions = []
+        questions = ['"Is there any evidence of COVID-19? RESPONSE IN JSON WITH {""EXIST"": 0 or 1, ""BOUNDING_BOX"": [x_topleft, y_topleft, x_bottomright, y_bottomright], ""LOCATION"": ""left lung"" or ""right lung"" or ""lung upper lobe left"" or ""lung upper lobe right"" or ""lung lower lobe left"" or ""lung lower lobe right"" or ""lung middle lobe right""}"']
+        return questions
+        # questions_file = self.data_dir / "questıons.csv"
+        # questions = []
         
-        try:
-            with open(questions_file, 'r', encoding='utf-8') as f:
-                reader = csv.reader(f)
-                for row in reader:
-                    if row and row[0].strip():  # Skip empty rows
-                        questions.append(row[0].strip())
+        # try:
+        #     with open(questions_file, 'r', encoding='utf-8') as f:
+        #         reader = csv.reader(f)
+        #         for row in reader:
+        #             if row and row[0].strip():  # Skip empty rows
+        #                 questions.append(row[0].strip())
      
             
-            logger.info(f"Loaded {len(questions)} questions from {questions_file}")
-            return questions
+        #     logger.info(f"Loaded {len(questions)} questions from {questions_file}")
+        #     return questions
             
-        except Exception as e:
-            logger.error(f"Error loading questions: {e}")
-            return []
+        # except Exception as e:
+        #     logger.error(f"Error loading questions: {e}")
+        #     return []
     
     def _load_samples(self) -> Dict[str, Any]:
         """Load samples from selected_500_samples.json"""
@@ -111,6 +113,7 @@ class XrayBatchProcessor:
             full_path = self.data_dir / Path(processed_path)
             
             if full_path.exists():
+                print(f"Image path {full_path} exists")
                 return str(full_path)
             else:
                 print(f"Image path {full_path} does not exist")
@@ -230,7 +233,7 @@ class XrayBatchProcessor:
         if filename is None:
             filename = "xray_analysis_results.json"
         
-        output_dir = Path("/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output")
+        output_dir = Path("/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output_google")
         output_dir.mkdir(parents=True, exist_ok=True)
         filepath = output_dir / filename
         
@@ -260,7 +263,7 @@ class XrayBatchProcessor:
     
     def load_existing_results(self) -> Dict[str, Any]:
         """Load existing results to continue processing"""
-        output_dir = Path("/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output")
+        output_dir = Path("/home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output_google")
         results = {}
         
         # Look for existing sample files
@@ -354,8 +357,8 @@ def main():
     processor.save_results(results, "xray_analysis_results.json")
     
     logger.info("Batch processing completed successfully")
-    logger.info(f"Individual sample files: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/sample_*.json")
-    logger.info(f"Consolidated results: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output/xray_analysis_results.json")
+    logger.info(f"Individual sample files: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output_google/sample_*.json")
+    logger.info(f"Consolidated results: /home/xiz569/rajpurkarlab/home/xiz569/xRAYaGENT/output_google/xray_analysis_results.json")
 
 if __name__ == "__main__":
     main() 
