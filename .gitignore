@@ -167,6 +167,7 @@ logs/
 # Output files
 outputs/
 output/
+output_google/
 output_medgemma/
 results/
 checkpoints/ 
