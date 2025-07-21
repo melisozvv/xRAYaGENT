@@ -1,0 +1,4 @@
+Model,Avg_Accuracy,Avg_Precision,Avg_Recall,Avg_F1,Total_Samples
+Enhanced X-ray Agent,58.3,21.4,50.3,26.4,4986
+Google COVID-19,29.6,19.7,91.9,32.5,500
+MedGemma VQA,40.1,17.3,52.4,20.6,5500
