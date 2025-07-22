@@ -98,7 +98,7 @@ def analyze_enhanced_agent_results():
     with open('output/xray_analysis_results_0722.json', 'r') as f:
         results = json.load(f)
 
-    with open('data/gpt4_correct_answers_balanced_test_20250718_153121.json', 'r') as f:
+    with open('data/gpt4_correct_answers_balanced_test_20250718_170441.json', 'r') as f:
         ground_truth = json.load(f)
 
     # Helper function to parse answer data
@@ -207,6 +207,8 @@ def analyze_enhanced_agent_results():
                     distances_true.append(truth_data['DISTANCE'] if truth_data['DISTANCE'] is not None else 0)
                     distances_pred.append(result_data_processed['DISTANCE'] if result_data_processed['DISTANCE'] is not None else 0)
                 else:
+                    print(truth_data)
+                    print(result_data_processed)
                     print(f"No matching field found for study {study_id} and question {question_num}")
             else:
                 print(f"Study {study_id} not found in ground truth")
@@ -295,7 +297,7 @@ def analyze_model_results(filename, name, answer_key):
         return answer_data
     
     # Load ground truth
-    with open('data/gpt4_correct_answers_balanced_test_20250718_153121.json', 'r') as f:
+    with open('data/gpt4_correct_answers_balanced_test_20250718_170441.json', 'r') as f:
         ground_truth = json.load(f)
     
     with open(filename, 'r') as f:

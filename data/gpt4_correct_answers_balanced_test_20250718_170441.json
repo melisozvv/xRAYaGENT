@@ -56244,7 +56244,10 @@
       "query": "Does this X-ray have consolidation? RESPONSE IN JSON WITH {\"EXIST\": 0 or 1, \"BOUNDING_BOX\": [x_topleft, y_topleft, x_bottomright, y_bottomright], \"LOCATION\": \"left lung\" or \"right lung\" or \"lung upper lobe left\" or \"lung upper lobe right\" or \"lung lower lobe left\" or \"lung lower lobe right\"}",
       "image_path": "processed_deid_png/GRDNNB36R1C0QNCK/GRDN8ZRZ7WMY9F2C/studies/1.2.826.0.1.3680043.8.498.30991579009713547450252618324880422345/series/1.2.826.0.1.3680043.8.498.57231158183505618345984327734612827176/instances/1.2.826.0.1.3680043.8.498.11646882662079127378078442808099179879.png",
       "results": {
-        "answer": {}
+        "answer": {
+          "EXIST": 1,
+          "LOCATION": ""
+        }
       }
     },
     "question2": {
