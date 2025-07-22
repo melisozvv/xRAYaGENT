@@ -79,7 +79,7 @@ class FunctionCall:
 
 class FunctionExecutor:
     """Executes predefined functions from tool classes"""
-    
+    ƒ
     def __init__(self):
         self.tools = {
             "TorchXrayVision": TorchXrayVisionClassifier(),

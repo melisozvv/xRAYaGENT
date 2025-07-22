@@ -389,4 +389,34 @@ def main():
     try:
         google_results = analyze_model_results(
             'output_google/xray_analysis_results.json', 
-            'GOOGLE C
+            'GOOGLE COVID-19', 
+            'results'
+        )
+        results_summary.append(google_results)
+    except FileNotFoundError as e:
+        print(f"Google results not found: {e}")
+    except Exception as e:
+        print(f"Error analyzing Google results: {e}")
+    
+    # Analyze MedGemma VQA
+    try:
+        medgemma_results = analyze_model_results(
+            'output_medgemma/medgemma/medgemma_analysis_results.json', 
+            'MEDGEMMA VQA', 
+            'answer'
+        )
+        results_summary.append(medgemma_results)
+    except FileNotFoundError as e:
+        print(f"MedGemma results not found: {e}")
+    except Exception as e:
+        print(f"Error analyzing MedGemma results: {e}")
+    
+    # Print comparison summary
+    print_comparison_summary(results_summary)
+    
+    print(f'\n{"="*100}')
+    print("Analysis complete! Results saved above.")
+    print(f'{"="*100}')
+
+if __name__ == "__main__":
+    main() 
