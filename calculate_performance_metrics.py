@@ -95,11 +95,24 @@ def analyze_enhanced_agent_results():
     print('='*80)
     
     # Load files
-    with open('output/xray_analysis_results.json', 'r') as f:
+    with open('output/xray_analysis_results_0722.json', 'r') as f:
         results = json.load(f)
 
     with open('data/gpt4_correct_answers_balanced_test_20250718_153121.json', 'r') as f:
         ground_truth = json.load(f)
+
+    # Helper function to parse answer data
+    def parse_answer_data(answer_data):
+        """Parse answer data, handling both JSON objects and JSON strings"""
+        if isinstance(answer_data, str):
+            try:
+                # Try to parse JSON string
+                parsed_data = json.loads(answer_data)
+                return parsed_data
+            except json.JSONDecodeError:
+                # If parsing fails, return as is
+                return answer_data
+        return answer_data
 
     # Collect data for each question
     question_metrics = {}
@@ -119,23 +132,80 @@ def analyze_enhanced_agent_results():
                 result_data = results[study_id][question_key].get('results', {})
                 truth_data = ground_truth[study_id][question_key]['results']['answer']
                 
+                # Parse result_data in case it contains JSON strings (especially for question 4)
+                parsed_result_data = parse_answer_data(result_data)
+                
+                # Handle cases where the answer is a JSON string (like question 4 copied from Google results)
+                if isinstance(parsed_result_data, str):
+                    try:
+                        parsed_result_data = json.loads(parsed_result_data)
+                    except json.JSONDecodeError:
+                        pass
+                
+                # Handle different data formats - always convert lists to compatible format
+                result_data_processed = parsed_result_data
+                
+                # If it's a list of detection results, convert to single dict format
+                if isinstance(parsed_result_data, list) and len(parsed_result_data) > 0:
+                    first_element = parsed_result_data[0]
+                    
+                    # If first element is a string, try to parse it as JSON
+                    if isinstance(first_element, str):
+                        try:
+                            first_element = json.loads(first_element)
+                        except json.JSONDecodeError:
+                            pass
+                    
+                    # Check if this looks like detection results
+                    if isinstance(first_element, dict) and 'EXIST' in first_element:
+                        # Check if any detection has EXIST=1
+                        has_detection = any(item.get('EXIST', 0) == 1 for item in parsed_result_data if isinstance(item, dict))
+                        result_exist_value = 1 if has_detection else 0
+                        
+                        # Extract location from first detection if available
+                        first_location = first_element.get('LOCATION', '') if isinstance(first_element, dict) else ''
+                        
+                        # Convert to compatible format
+                        result_data_processed = {
+                            'EXIST': result_exist_value,
+                            'LOCATION': first_location
+                        }
+                    else:
+                        # Use first element if not detection format
+                        result_data_processed = first_element
+                        
+                # Handle general response format with 'answer' field
+                elif isinstance(parsed_result_data, dict) and 'answer' in parsed_result_data:
+                    answer_content = parsed_result_data['answer']
+                    
+                    # Try to parse the answer content as JSON
+                    if isinstance(answer_content, str):
+                        try:
+                            answer_json = json.loads(answer_content)
+                            result_data_processed = answer_json
+                        except json.JSONDecodeError:
+                            # If not JSON, keep original
+                            result_data_processed = parsed_result_data
+                    else:
+                        result_data_processed = answer_content
+
                 # Binary classification (EXIST, NORMAL)
-                if 'EXIST' in truth_data and 'EXIST' in result_data:
+                if 'EXIST' in truth_data and 'EXIST' in result_data_processed:
                     y_true.append(truth_data['EXIST'])
-                    y_pred.append(result_data['EXIST'])
-                elif 'NORMAL' in truth_data and 'NORMAL' in result_data:
+                    y_pred.append(result_data_processed['EXIST'])
+                elif 'NORMAL' in truth_data and 'NORMAL' in result_data_processed:
                     y_true.append(truth_data['NORMAL'])
-                    y_pred.append(result_data['NORMAL'])
+                    y_pred.append(result_data_processed['NORMAL'])
                 # Multi-class (DISEASES)
-                elif 'DISEASES' in truth_data and 'DISEASES' in result_data:
+                elif 'DISEASES' in truth_data and 'DISEASES' in result_data_processed:
                     true_diseases = set(truth_data['DISEASES']) if truth_data['DISEASES'] else set()
-                    pred_diseases = set(result_data['DISEASES']) if result_data['DISEASES'] else set()
+                    pred_diseases = set(result_data_processed['DISEASES']) if result_data_processed['DISEASES'] else set()
                     y_true_sets.append(true_diseases)
                     y_pred_sets.append(pred_diseases)
                 # Distance comparison
-                elif 'DISTANCE' in truth_data and 'DISTANCE' in result_data:
+                elif 'DISTANCE' in truth_data and 'DISTANCE' in result_data_processed:
                     distances_true.append(truth_data['DISTANCE'] if truth_data['DISTANCE'] is not None else 0)
-                    distances_pred.append(result_data['DISTANCE'] if result_data['DISTANCE'] is not None else 0)
+                    distances_pred.append(result_data_processed['DISTANCE'] if result_data_processed['DISTANCE'] is not None else 0)
                 else:
                     print(f"No matching field found for study {study_id} and question {question_num}")
             else:
@@ -211,6 +281,19 @@ def analyze_model_results(filename, name, answer_key):
     print(f'{name} RESULTS - PERFORMANCE METRICS (500 SAMPLES)')
     print(f'{"="*80}')
     
+    # Helper function to parse answer data
+    def parse_answer_data(answer_data):
+        """Parse answer data, handling both JSON objects and JSON strings"""
+        if isinstance(answer_data, str):
+            try:
+                # Try to parse JSON string
+                parsed_data = json.loads(answer_data)
+                return parsed_data
+            except json.JSONDecodeError:
+                # If parsing fails, return as is
+                return answer_data
+        return answer_data
+    
     # Load ground truth
     with open('data/gpt4_correct_answers_balanced_test_20250718_153121.json', 'r') as f:
         ground_truth = json.load(f)
@@ -237,6 +320,52 @@ def analyze_model_results(filename, name, answer_key):
                         pred_data = results[study_id][question_key]['answer']
                     else:
                         pred_data = results[study_id][question_key]['results']
+                    
+                    # Parse pred_data in case it contains JSON strings
+                    pred_data = parse_answer_data(pred_data)
+                    
+                    # Handle different data formats - always convert lists to compatible format
+                    if isinstance(pred_data, list) and len(pred_data) > 0:
+                        first_element = pred_data[0]
+                        
+                        # If first element is a string, try to parse it as JSON
+                        if isinstance(first_element, str):
+                            try:
+                                first_element = json.loads(first_element)
+                            except json.JSONDecodeError:
+                                pass
+                        
+                        # Check if this looks like detection results
+                        if isinstance(first_element, dict) and 'EXIST' in first_element:
+                            # Check if any detection has EXIST=1
+                            has_detection = any(item.get('EXIST', 0) == 1 for item in pred_data if isinstance(item, dict))
+                            
+                            # Extract location from first detection if available
+                            first_location = first_element.get('LOCATION', '') if isinstance(first_element, dict) else ''
+                            
+                            # Convert to compatible format
+                            pred_data = {
+                                'EXIST': 1 if has_detection else 0,
+                                'LOCATION': first_location
+                            }
+                        else:
+                            # Use first element if not detection format
+                            pred_data = first_element
+                            
+                    # Handle general response format with 'answer' field
+                    elif isinstance(pred_data, dict) and 'answer' in pred_data:
+                        answer_content = pred_data['answer']
+                        
+                        # Try to parse the answer content as JSON
+                        if isinstance(answer_content, str):
+                            try:
+                                answer_json = json.loads(answer_content)
+                                pred_data = answer_json
+                            except json.JSONDecodeError:
+                                # If not JSON, keep original
+                                pass
+                        else:
+                            pred_data = answer_content
                     
                     truth_data = ground_truth[study_id][question_key]['results']['answer']
                     total += 1
@@ -385,7 +514,7 @@ def main():
     except Exception as e:
         print(f"Error analyzing Enhanced Agent results: {e}")
     
-    # Analyze Google COVID-19 Detection
+     # Analyze Google COVID-19 Detection
     try:
         google_results = analyze_model_results(
             'output_google/xray_analysis_results.json', 
@@ -401,7 +530,7 @@ def main():
     # Analyze MedGemma VQA
     try:
         medgemma_results = analyze_model_results(
-            'output_medgemma/medgemma/medgemma_analysis_results.json', 
+            'output_medgemma/medgemma/medgemma_analysis_results_0722.json', 
             'MEDGEMMA VQA', 
             'answer'
         )
